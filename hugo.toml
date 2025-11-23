@@ -1,3 +1,4 @@
 baseURL = 'https://keysense-ai-site.pages.dev/'
 languageCode = 'en-us'
 title = 'My New Hugo Site'
+theme = "ananke"
