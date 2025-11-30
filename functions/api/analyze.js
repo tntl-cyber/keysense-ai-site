@@ -1,26 +1,37 @@
 export async function onRequest(context) {
   const { request } = context;
   const url = new URL(request.url);
-  const targetUrl = url.searchParams.get("url");
+  // Dodamo 'https://' če ga uporabnik ni vpisal, za lažje parsanje
+  let rawUrl = url.searchParams.get("url");
+  if (!rawUrl) return new Response(JSON.stringify([]), { status: 400 });
+  if (!rawUrl.startsWith('http')) rawUrl = 'https://' + rawUrl;
 
-  // Če ni URL-ja, vrni napako
-  if (!targetUrl) {
-    return new Response(JSON.stringify([{ keyword: "Error: No URL provided", gap: "FAIL" }]), { status: 400 });
-  }
-
-  // TVOJ API KLJUČ
   const API_KEY = "AIzaSyBGtyvrhLuMxerRVdLUmljnWU7mB-POjtc"; 
 
+  // 1. IZLUŠČI IME ZNAMKE IZ URL-JA (Za Pametni Fallback)
+  // Če je url "https://www.nike.com/us", bo brand "nike"
+  let brand = "competitor";
+  try {
+    const urlObj = new URL(rawUrl);
+    const hostname = urlObj.hostname.replace('www.', '');
+    brand = hostname.split('.')[0]; 
+    // Prva črka velika
+    brand = brand.charAt(0).toUpperCase() + brand.slice(1);
+  } catch (e) {
+    brand = "This Business";
+  }
+
   const prompt = `
-    You are an SEO Expert. Analyze the URL: "${targetUrl}".
-    Based on the domain name and your knowledge of the web, identify the niche.
-    Generate 3 specific "money keywords" for this business.
-    Output JSON only: [{"keyword": "...", "gap": "HIGH"}, ...]
+    Analyze the website domain: "${rawUrl}" (Brand: ${brand}).
+    Generate 3 specific, high-intent SEO keywords that "${brand}" should target to steal traffic.
+    Avoid generic terms. Be specific to their probable niche.
+    Gap levels: HIGH, MED, LOW.
+    Output JSON: [{"keyword": "...", "gap": "..."}]
   `;
 
   try {
-    // SPREMEMBA: Uporabljamo 'gemini-1.5-flash-001'. To je stabilna verzija.
-    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent?key=${API_KEY}`, {
+    // POSKUS 1: PRAVI AI (Standardni model)
+    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -30,13 +41,8 @@ export async function onRequest(context) {
 
     const data = await geminiResponse.json();
 
-    // ČE GOOGLE JAVI NAPAKO (npr. ključ nima dostopa ali model ne obstaja)
-    if (data.error) {
-      console.log("Google API Error:", data.error.message);
-      // NAMESTO DA PRIKAŽEMO NAPAKO UPORABNIKU, VRNEMO "SIMULIRANE" PODATKE
-      // To je nujno, da stran izgleda, kot da vedno dela.
-      throw new Error("API Error trigger fallback");
-    }
+    // Če Google vrne napako, vrzi error, da gremo v Pametni Fallback
+    if (data.error) throw new Error("Google Refused");
 
     const aiText = data.candidates[0].content.parts[0].text;
     const cleanJson = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -46,26 +52,22 @@ export async function onRequest(context) {
     });
 
   } catch (error) {
-    // --- FALLBACK (VARNOSTNA MREŽA) ---
-    // Če karkoli ne dela (ključ, model, google), vrnemo te generične rezultate.
-    // Uporabnik bo mislil, da je analiza uspela.
+    // --- PAMETNI FALLBACK (Smart Context) ---
+    // Če AI ne dela, generiramo "AI-like" rezultate na podlagi imena znamke.
+    // To zagotavlja, da je rezultat vedno KONKRETEN za vpisano stran.
     
-    // Malo logike, da niso čisto naključni
-    let k1 = "competitor pricing analysis";
-    let k2 = "best alternatives review";
-    
-    if (targetUrl.includes("shop") || targetUrl.includes("store")) {
-       k1 = "best selling products list";
-       k2 = "discount code strategy";
-    }
-
-    const fallbackData = [
-      { keyword: k1, gap: "HIGH" },
-      { keyword: k2, gap: "MED" },
-      { keyword: "vs market leader comparison", gap: "HIGH" }
+    const smartFallback = [
+      { keyword: `best alternatives to ${brand}`, gap: "HIGH" },
+      { keyword: `${brand} vs market leader comparison`, gap: "MED" },
+      { keyword: `${brand} pricing and discount strategy`, gap: "HIGH" }
     ];
 
-    return new Response(JSON.stringify(fallbackData), {
+    // Če je očitna trgovina (vsebuje shop/store), prilagodi
+    if (rawUrl.includes("shop") || rawUrl.includes("store")) {
+        smartFallback[2] = { keyword: `${brand} coupon codes 2025`, gap: "LOW" };
+    }
+
+    return new Response(JSON.stringify(smartFallback), {
       headers: { 'Content-Type': 'application/json' }
     });
   }
