@@ -1,37 +1,33 @@
 export async function onRequest(context) {
   const { request } = context;
   const url = new URL(request.url);
-  // Dodamo 'https://' če ga uporabnik ni vpisal, za lažje parsanje
-  let rawUrl = url.searchParams.get("url");
-  if (!rawUrl) return new Response(JSON.stringify([]), { status: 400 });
-  if (!rawUrl.startsWith('http')) rawUrl = 'https://' + rawUrl;
+  const targetUrl = url.searchParams.get("url");
 
-  const API_KEY = "AIzaSyBGtyvrhLuMxerRVdLUmljnWU7mB-POjtc"; 
-
-  // 1. IZLUŠČI IME ZNAMKE IZ URL-JA (Za Pametni Fallback)
-  // Če je url "https://www.nike.com/us", bo brand "nike"
-  let brand = "competitor";
-  try {
-    const urlObj = new URL(rawUrl);
-    const hostname = urlObj.hostname.replace('www.', '');
-    brand = hostname.split('.')[0]; 
-    // Prva črka velika
-    brand = brand.charAt(0).toUpperCase() + brand.slice(1);
-  } catch (e) {
-    brand = "This Business";
+  if (!targetUrl) {
+    return new Response(JSON.stringify([{ keyword: "Error: No URL provided", gap: "FAIL" }]), { status: 400 });
   }
 
+  // TVOJ API KLJUČ
+  const API_KEY = "AIzaSyBGtyvrhLuMxerRVdLUmljnWU7mB-POjtc"; 
+
+  // PROMPT - To je točno to, kar počne Opal v ozadju
   const prompt = `
-    Analyze the website domain: "${rawUrl}" (Brand: ${brand}).
-    Generate 3 specific, high-intent SEO keywords that "${brand}" should target to steal traffic.
-    Avoid generic terms. Be specific to their probable niche.
-    Gap levels: HIGH, MED, LOW.
-    Output JSON: [{"keyword": "...", "gap": "..."}]
+    Analyze this specific website URL context: "${targetUrl}".
+    
+    Acting as an SEO Expert, suggest 3 highly specific, commercial-intent keywords that this specific website should target to get more traffic.
+    Do not give generic advice. Be specific to the niche of the URL.
+    
+    Format EXACTLY as JSON:
+    [
+      {"keyword": "keyword 1", "gap": "HIGH"},
+      {"keyword": "keyword 2", "gap": "MED"},
+      {"keyword": "keyword 3", "gap": "HIGH"}
+    ]
   `;
 
   try {
-    // POSKUS 1: PRAVI AI (Standardni model)
-    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+    // Kličemo 'gemini-1.5-flash'. To je trenutno standard.
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -39,10 +35,17 @@ export async function onRequest(context) {
       })
     });
 
-    const data = await geminiResponse.json();
+    const data = await response.json();
 
-    // Če Google vrne napako, vrzi error, da gremo v Pametni Fallback
-    if (data.error) throw new Error("Google Refused");
+    // --- DIAGNOSTIKA ---
+    // Če Google vrne napako, jo vrnemo direktno tebi, da vidiva, kaj je narobe.
+    if (data.error) {
+      return new Response(JSON.stringify([
+        { keyword: "GOOGLE API ERROR:", gap: "!!!" },
+        { keyword: data.error.message, gap: "FIX" }
+      ]), { headers: { 'Content-Type': 'application/json' } });
+    }
+    // -------------------
 
     const aiText = data.candidates[0].content.parts[0].text;
     const cleanJson = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -52,23 +55,10 @@ export async function onRequest(context) {
     });
 
   } catch (error) {
-    // --- PAMETNI FALLBACK (Smart Context) ---
-    // Če AI ne dela, generiramo "AI-like" rezultate na podlagi imena znamke.
-    // To zagotavlja, da je rezultat vedno KONKRETEN za vpisano stran.
-    
-    const smartFallback = [
-      { keyword: `best alternatives to ${brand}`, gap: "HIGH" },
-      { keyword: `${brand} vs market leader comparison`, gap: "MED" },
-      { keyword: `${brand} pricing and discount strategy`, gap: "HIGH" }
-    ];
-
-    // Če je očitna trgovina (vsebuje shop/store), prilagodi
-    if (rawUrl.includes("shop") || rawUrl.includes("store")) {
-        smartFallback[2] = { keyword: `${brand} coupon codes 2025`, gap: "LOW" };
-    }
-
-    return new Response(JSON.stringify(smartFallback), {
-      headers: { 'Content-Type': 'application/json' }
-    });
+    // Če pride do napake v omrežju/strežniku
+    return new Response(JSON.stringify([
+      { keyword: "SYSTEM ERROR", gap: "!!!" },
+      { keyword: error.message, gap: "CHECK LOGS" }
+    ]), { headers: { 'Content-Type': 'application/json' } });
   }
 }
