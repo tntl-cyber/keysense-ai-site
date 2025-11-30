@@ -60,34 +60,79 @@ layout: "index"
         border: 1px solid #E5E7EB;
     }
 
-    /* TOP HALF: OPAL EMBED AREA */
-    .opal-embed-area {
-        background: #fff;
-        min-height: 500px; /* Dovolj prostora za Opal */
+    /* --- NEW LAUNCHER DESIGN (Fix for Iframe) --- */
+    .launcher-area {
+        background: linear-gradient(135deg, #4F46E5 0%, #4338ca 100%);
+        min-height: 350px;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 0;
-        width: 100%;
-    }
-
-    /* To zagotovi, da je iframe čez celo širino */
-    .opal-embed-area iframe {
-        width: 100%;
-        height: 500px; /* Prilagodi, če je tvoj Opal višji/nižji */
-        border: none;
-    }
-
-    /* Placeholder, dokler ne vstaviš kode */
-    .placeholder-box {
-        border: 2px dashed #E5E7EB;
-        padding: 40px;
+        padding: 20px;
         text-align: center;
-        color: var(--ks-text-muted);
+        color: white;
+    }
+
+    .launcher-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: white;
+    }
+
+    .fake-input-group {
+        background: white;
+        padding: 8px;
+        border-radius: 12px;
+        display: flex;
+        width: 100%;
+        max-width: 480px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        align-items: center;
+        transition: transform 0.2s;
+    }
+
+    .fake-input-group:hover {
+        transform: scale(1.02);
+    }
+
+    .fake-input-text {
+        flex-grow: 1;
+        text-align: left;
+        padding-left: 15px;
+        color: #9CA3AF;
+        font-family: monospace;
+        font-size: 0.9rem;
+        user-select: none;
+    }
+
+    .launch-btn {
+        background: #111827;
+        color: white;
+        text-decoration: none;
+        padding: 12px 24px;
         border-radius: 8px;
-        width: 80%;
-        margin: 20px;
+        font-weight: 700;
+        white-space: nowrap;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .launch-btn:hover {
+        background: black;
+        text-decoration: none;
+        color: white;
+    }
+
+    .secure-note {
+        margin-top: 15px;
+        font-size: 0.85rem;
+        opacity: 0.8;
+        display: flex;
+        align-items: center;
+        gap: 6px;
     }
 
     /* BOTTOM HALF: THE "LOCKED" SECTION */
@@ -95,7 +140,6 @@ layout: "index"
         position: relative;
         padding: 20px 30px 40px;
         background: #fff;
-        border-top: 1px solid #F3F4F6;
     }
 
     .data-header {
@@ -230,6 +274,7 @@ layout: "index"
         }
         .hero-h1 { font-size: 2rem; }
         .app-container { margin-left: -10px; margin-right: -10px; }
+        .fake-input-text { font-size: 0.8rem; }
     }
 </style>
 
@@ -247,17 +292,27 @@ layout: "index"
     <!-- THE TOOL + LOCKED DATA -->
     <div class="app-container">
         
-        <!-- 1. OPAL EMBED SECTION -->
-<iframe 
-    src="https://opal.google/_app/?flow=drive:/1YrniwQUme5qe_Mf6aQhg-fNCCfF98Jp-&shared&mode=app" 
-    width="100%" 
-    height="600" 
-    style="border:none; border-radius: 8px; background-color: #f9fafb;"
-    title="KeySense AI Tool"
-    allow="clipboard-write">
-</iframe>
+        <!-- 1. LAUNCHER AREA (Fix for Iframe) -->
+        <div class="launcher-area">
+            <h2 class="launcher-title">Enter Competitor URL to Start Analysis</h2>
+            
+            <!-- This looks like an input but is actually a button to open the app -->
+            <a href="https://opal.google/_app/?flow=drive:/1YrniwQUme5qe_Mf6aQhg-fNCCfF98Jp-&shared&mode=app" target="_blank" style="text-decoration: none; width: 100%; display: flex; justify-content: center;">
+                <div class="fake-input-group">
+                    <div class="fake-input-text">https://competitor.com...</div>
+                    <div class="launch-btn">
+                        RUN AUDIT ⚡
+                    </div>
+                </div>
+            </a>
 
-        <!-- 2. THE PSYCHOLOGICAL LOCK (Spodnji del) -->
+            <div class="secure-note">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                Powered by Google Opal (Secure Environment)
+            </div>
+        </div>
+
+        <!-- 2. THE PSYCHOLOGICAL LOCK -->
         <div class="locked-data-area">
             <div class="data-header">
                 <h3>Hidden Opportunity Analysis</h3>
@@ -265,7 +320,6 @@ layout: "index"
             </div>
 
             <div class="blur-zone">
-                <!-- Ti podatki so zamegljeni, samo za izgled -->
                 <div class="fake-row"><span>best crm for startups</span><span>Vol: 12k | KD: 84%</span></div>
                 <div class="fake-row"><span>hubspot alternative</span><span>Vol: 5.1k | KD: 42%</span></div>
                 <div class="fake-row"><span>email marketing tools</span><span>Vol: 22k | KD: 91%</span></div>
@@ -279,34 +333,10 @@ layout: "index"
                     To see Search Volume, Keyword Difficulty (KD%), and backlink data, you need the live database.
                 </div>
                 
-                <!-- !!! POZOR: TUKAJ ZAMENJAJ LINK !!! -->
+                <!-- !!! POZOR: TUKAJ ZAMENJAJ LINK ZA SEMRUSH !!! -->
                 <a href="https://www.semrush.com/" class="affiliate-btn" target="_blank">
                     Unlock Full Report (Free Trial)
                 </a>
-                <!-- !!! KONEC ZAMENJAVE LINKA !!! -->
-
-                <div class="guarantee">14-Day Free Trial • Cancel Anytime</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- HOW IT WORKS -->
-    <div class="how-it-works">
-        <div class="step">
-            <h4>1. Input URL</h4>
-            <p>Paste any competitor's website. Our AI scans their visible content structure for weaknesses.</p>
-        </div>
-        <div class="step">
-            <h4>2. AI Gap Analysis</h4>
-            <p>KeySense identifies the "Money Keywords" they are targeting and the ones they missed.</p>
-        </div>
-        <div class="step">
-            <h4>3. Unlock Profit</h4>
-            <p>Get instant ideas, then use the pro tools to track volume and difficulty.</p>
-        </div>
-    </div>
-
-</div>
-<!-- END OF KEYSENSE AI LANDING PAGE -->
+                <!-- !!! KONEC
 
 
