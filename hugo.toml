@@ -1,4 +1,4 @@
-baseURL = 'https://keysense-ai-site.pages.dev/'
+baseURL = "https://keysense-ai.io/"
 languageCode = 'en-us'
-title = 'My New Hugo Site'
+title = "Keysense AI | Uvodna Stran"
 theme = "ananke"
