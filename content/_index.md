@@ -1,4 +1,11 @@
 ---
+title: "KeySense AI..."
+...
+---
+
+<!-- START OF KEYSENSE AI LANDING PAGE -->
+<style>
+...
 title: "KeySense AI - Free Competitor Keyword Gap Analyzer"
 description: "Steal your competitor's best keywords instantly. The only free AI tool that analyzes content gaps without signup."
 date: 2025-11-30
