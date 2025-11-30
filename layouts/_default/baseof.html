@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KeySense AI - Free Competitor Gap Analyzer</title>
-    <meta name="description" content="Steal your competitor's best keywords instantly.">
+    <meta name="description" content="Steal your competitor's best keywords instantly using Google Gemini AI.">
     
     <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -44,19 +44,14 @@
             position: relative;
         }
 
-        /* 1. STATE: LAUNCHER (INPUT) */
+        /* 1. STATE: LAUNCHER */
         .launcher-area {
             background: linear-gradient(135deg, #4F46E5 0%, #4338ca 100%);
             padding: 80px 20px;
             text-align: center;
-            display: flex; /* Privzeto vidno */
-            flex-direction: column;
-            align-items: center;
-            height: 100%;
-            justify-content: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;
         }
         .launcher-title { color: white; font-size: 1.5rem; font-weight: 700; margin: 0 0 20px 0; }
-        
         .input-group {
             background: white; padding: 8px; border-radius: 12px;
             display: flex; width: 100%; max-width: 500px;
@@ -72,37 +67,30 @@
             cursor: pointer; transition: background 0.2s; white-space: nowrap;
         }
         .launch-btn:hover { background: #000; }
+        .launch-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 
-        /* 2. STATE: LOADING SPINNER (HIDDEN DEFAULT) */
+        /* 2. STATE: LOADING */
         .loading-area {
-            display: none; /* Skrito */
-            background: #fff;
-            padding: 80px 20px;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            height: 400px;
+            display: none; background: #fff; padding: 80px 20px;
+            flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 400px;
         }
         .spinner {
             width: 50px; height: 50px;
             border: 5px solid #E5E7EB; border-top: 5px solid #4F46E5;
-            border-radius: 50%; animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+            border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .loading-text { font-weight: 600; color: #4F46E5; font-size: 1.1rem; }
-        .loading-sub { color: #6B7280; font-size: 0.9rem; margin-top: 5px; }
 
-        /* 3. STATE: RESULTS (HIDDEN DEFAULT) */
-        .results-area { display: none; /* Skrito */ }
-        
+        /* 3. STATE: RESULTS */
+        .results-area { display: none; }
         .data-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 30px; border-bottom: 1px solid #F3F4F6; background: #fff; }
-        .data-header h3 { font-size: 1rem; font-weight: 700; margin: 0; }
         .badge-lock { background: #FEF2F2; color: #DC2626; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 99px; }
         
         .result-list { padding: 0 30px 40px; background: #fff; position: relative; }
         .row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #F9FAFB; font-family: monospace; font-size: 0.95rem; color: #374151; }
+        
+        /* Dynamic Real Results Style */
         .row.unlocked { color: #111827; font-weight: 600; border-left: 3px solid #10B981; padding-left: 10px; background: #ECFDF5; }
         
         .blur-zone { filter: blur(5px); opacity: 0.6; user-select: none; }
@@ -130,7 +118,6 @@
 
         @media (max-width: 640px) {
             .how-it-works { grid-template-columns: 1fr; text-align: center; }
-            .hero-h1 { font-size: 2rem; }
             .input-group { flex-direction: column; padding: 10px; }
             .launch-btn { width: 100%; margin-top: 10px; }
         }
@@ -139,36 +126,33 @@
 <body>
 
 <div class="keysense-wrapper">
-
-    <!-- HERO -->
     <div class="hero-section">
         <h1 class="hero-h1">Steal Your Competitor's <span style="color: #4F46E5;">Best Keywords</span></h1>
-        <p class="hero-sub">The only free AI tool that analyzes content gaps instantly. Stop guessing.</p>
+        <p class="hero-sub">Real-time AI analysis powered by Google Gemini. No login required.</p>
     </div>
 
-    <!-- MAIN APP CONTAINER -->
     <div class="app-container">
         
-        <!-- 1. LAUNCHER (VIDNO NA ZAČETKU) -->
+        <!-- 1. LAUNCHER -->
         <div id="launcher" class="launcher-area">
             <h2 class="launcher-title">Enter Competitor URL to Start Analysis</h2>
             <div class="input-group">
-                <input type="text" id="urlInput" class="url-input" placeholder="https://competitor.com" value="https://">
-                <button onclick="runAudit()" class="launch-btn">RUN AUDIT ⚡</button>
+                <input type="text" id="urlInput" class="url-input" placeholder="https://example.com" value="https://">
+                <button onclick="runRealAudit()" class="launch-btn" id="btnRun">RUN AUDIT ⚡</button>
             </div>
             <div style="margin-top: 15px; font-size: 0.85rem; opacity: 0.8; color: white;">
-                🔒 Secure Analysis • No Signup Required
+                🔒 Live AI Scan • Secure Environment
             </div>
         </div>
 
-        <!-- 2. LOADING SCREEN (SKRITO) -->
+        <!-- 2. LOADING -->
         <div id="loader" class="loading-area">
             <div class="spinner"></div>
-            <div id="loadingText" class="loading-text">Connecting to Knowledge Graph...</div>
-            <div id="loadingSub" class="loading-sub">Analyzing content structure</div>
+            <div id="loadingText" class="loading-text">Connecting to Live AI...</div>
+            <div style="color:#6B7280; font-size:0.9rem; margin-top:5px;">This may take up to 10 seconds</div>
         </div>
 
-        <!-- 3. RESULTS SCREEN (SKRITO) -->
+        <!-- 3. RESULTS -->
         <div id="results" class="results-area">
             <div class="data-header">
                 <h3>Hidden Opportunity Analysis</h3>
@@ -176,19 +160,16 @@
             </div>
 
             <div class="result-list">
-                <!-- Free "Unlocked" Keywords -->
-                <div class="row unlocked"><span>🔥 competitor pricing strategy</span><span>Gap: HIGH</span></div>
-                <div class="row unlocked"><span>🔥 best alternatives to [Brand]</span><span>Gap: MED</span></div>
-                <div class="row unlocked"><span>🔥 how to use [Product] for free</span><span>Gap: HIGH</span></div>
+                <!-- REAL AI RESULTS WILL GO HERE -->
+                <div id="dynamicResults"></div>
 
-                <!-- Blurred Locked Data -->
+                <!-- BLURRED FAKE DATA (Psychology) -->
                 <div class="blur-zone">
                     <div class="row"><span>customer retention metrics</span><span>Vol: 12k | KD: 84%</span></div>
-                    <div class="row"><span>hubspot alternative</span><span>Vol: 5.1k | KD: 42%</span></div>
-                    <div class="row"><span>email marketing tools</span><span>Vol: 22k | KD: 91%</span></div>
-                    <div class="row"><span>sales funnel builder</span><span>Vol: 14k | KD: 78%</span></div>
+                    <div class="row"><span>competitor pricing analysis</span><span>Vol: 5.1k | KD: 42%</span></div>
+                    <div class="row"><span>best software alternatives</span><span>Vol: 22k | KD: 91%</span></div>
+                    <div class="row"><span>sales funnel strategy</span><span>Vol: 14k | KD: 78%</span></div>
                     <div class="row"><span>seo audit checklist</span><span>Vol: 8.9k | KD: 65%</span></div>
-                    <div class="row"><span>crm software reviews</span><span>Vol: 45k | KD: 94%</span></div>
                 </div>
 
                 <div class="cta-overlay">
@@ -196,66 +177,77 @@
                     <div style="color: #6B7280; margin-bottom: 24px;">
                         To see exact Search Volume and Difficulty, you need the live database.
                     </div>
-                    
                     <!-- AFFILIATE LINK -->
                     <a href="https://www.semrush.com/" class="affiliate-btn" target="_blank">
                         Unlock Full Report (Free Trial)
                     </a>
-                    
                     <div style="margin-top: 12px; font-size: 0.8rem; color: #6B7280;">14-Day Free Trial • Cancel Anytime</div>
                 </div>
             </div>
         </div>
-
     </div>
 
-    <!-- STEPS -->
     <div class="how-it-works">
         <div class="step">
             <h4>1. Input URL</h4>
-            <p>Paste any competitor's website. Our tool simulates a content gap scan.</p>
+            <p>Paste any URL. We send it to Google's Gemini AI for real-time processing.</p>
         </div>
         <div class="step">
-            <h4>2. Identify Gaps</h4>
-            <p>We reveal top-level content opportunities you are missing right now.</p>
+            <h4>2. AI Analysis</h4>
+            <p>The AI reads the page content and extracts high-value content gaps.</p>
         </div>
         <div class="step">
             <h4>3. Unlock Profit</h4>
-            <p>Use the professional data to dominate the search rankings.</p>
+            <p>Get your strategy, then track the data with the full professional suite.</p>
         </div>
     </div>
-
 </div>
 
-<!-- JAVASCRIPT LOGIC -->
 <script>
-    function runAudit() {
-        const url = document.getElementById('urlInput').value;
-        if(url.length < 8) { alert("Please enter a valid URL"); return; }
+    async function runRealAudit() {
+        const urlInput = document.getElementById('urlInput');
+        const url = urlInput.value;
 
-        // 1. Skrij launcher, pokaži loader
+        if(url.length < 8 || !url.includes('.')) { 
+            alert("Please enter a valid URL (e.g., https://example.com)"); 
+            return; 
+        }
+
+        // UI Change
         document.getElementById('launcher').style.display = 'none';
         document.getElementById('loader').style.display = 'flex';
+        
+        try {
+            // CALL OUR CLOUDFLARE FUNCTION
+            // This calls the /api/analyze.js file we created
+            const response = await fetch(`/api/analyze?url=${encodeURIComponent(url)}`);
+            
+            if (!response.ok) throw new Error("Analysis failed");
+            
+            const keywords = await response.json();
 
-        // 2. Simuliraj proces nalaganja (Psihologija)
-        const textElement = document.getElementById('loadingText');
-        const subElement = document.getElementById('loadingSub');
+            // RENDER RESULTS
+            const container = document.getElementById('dynamicResults');
+            container.innerHTML = ''; // Clear old
 
-        setTimeout(() => {
-            textElement.innerText = "Scanning " + url + "...";
-            subElement.innerText = "Extracting visible H1/H2 tags";
-        }, 1000);
+            keywords.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'row unlocked';
+                div.innerHTML = `<span>🔥 ${item.keyword}</span><span>Gap: ${item.gap}</span>`;
+                container.appendChild(div);
+            });
 
-        setTimeout(() => {
-            textElement.innerText = "Identifying Keyword Gaps...";
-            subElement.innerText = "Comparing against top 10 competitors";
-        }, 2500);
-
-        // 3. Pokaži rezultate po 4 sekundah
-        setTimeout(() => {
+            // SHOW RESULTS
             document.getElementById('loader').style.display = 'none';
             document.getElementById('results').style.display = 'block';
-        }, 4000);
+
+        } catch (error) {
+            console.error(error);
+            alert("AI Analysis failed. Please try a simpler URL or try again.");
+            // Reset UI on error
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('launcher').style.display = 'flex';
+        }
     }
 </script>
 
