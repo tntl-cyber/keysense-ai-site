@@ -1,4 +1,9 @@
 baseURL = "https://keysense-ai.io/"
 languageCode = 'en-us'
-title = "Keysense AI | Uvodna Stran"
+title = "Keysense AI | HOME"
 theme = "ananke"
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
