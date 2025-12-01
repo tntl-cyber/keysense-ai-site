@@ -7,7 +7,9 @@ export async function onRequest(context) {
 
   // 1. DOLOČI BRAND (Da ga lahko PREPOVEDEMO v rezultatih)
   let domain = targetUrl.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
-  let brandName = domain.split('.')[0]; // npr. "futunatura"
+  let brandName = domain.split('.')[0]; 
+  // Naredi prvo črko veliko (npr. "Futunatura")
+  brandName = brandName.charAt(0).toUpperCase() + brandName.slice(1);
 
   const GEMINI_KEY = "AIzaSyBGtyvrhLuMxerRVdLUmljnWU7mB-POjtc";
   const SERPER_KEY = "5ddb9fe661387ffb18f471615704b32ddbec0b13";
@@ -35,36 +37,30 @@ export async function onRequest(context) {
     // Izlušči naslove produktov iz iskanja
     if (serperData.organic) {
         serperData.organic.forEach(result => {
-             // Odstrani ime branda iz naslova, da dobimo samo produkt
-             // npr "Omega 3 Kapsule - Futunatura" -> "Omega 3 Kapsule"
+             // Odstrani ime branda iz naslova
              let cleanTitle = result.title.replace(new RegExp(brandName, "gi"), "").replace(/\|/g, "").trim();
              if (cleanTitle.length > 3) {
-                productContext += `- Product/Category: ${cleanTitle} (Desc: ${result.snippet})\n`;
+                productContext += `- Product: ${cleanTitle} (Desc: ${result.snippet})\n`;
              }
         });
     }
 
     // 3. PROMPT: "NON-BRANDED GAP ANALYSIS"
-    // To je ključna sprememba. AI-ju prepovemo uporabo imena firme.
     const prompt = `
       You are a Black Hat SEO Strategist.
       Target Site: "${domain}" (Brand: ${brandName})
       
-      I have analyzed their top pages and found these products/categories:
+      I have analyzed their top pages and found these products:
       ${productContext}
 
       YOUR MISSION:
       Generate 3 "Content Gap" keywords that catch customers BEFORE they buy specific brands.
       
       CRITICAL RULES:
-      1. FORBIDDEN: Do NOT use the word "${brandName}" in the keywords. Zero brand names allowed.
-      2. TARGET: Use the PRODUCT NAMES found above (e.g. "Magnesium", "CRM", "Shoes").
-      3. INTENT: Combine product name with "best", "vs", "price", "for sleep", "for small business".
-      4. LANGUAGE: Detect language from the snippets (e.g. Slovenian) and output keywords in that language.
-
-      Example:
-      If site sells "Futunatura Magnesium", DO NOT output "Futunatura reviews".
-      OUTPUT: "Best magnesium citrate for sleep" or "Magnezijev citrat akcija".
+      1. FORBIDDEN: Do NOT use the word "${brandName}" in the keywords.
+      2. TARGET: Use the PRODUCT NAMES found above.
+      3. INTENT: Combine product name with "best", "vs", "price", "for sleep", "review".
+      4. LANGUAGE: Output keywords in the language of the snippets (e.g. Slovenian).
 
       Output JSON: [{"keyword": "...", "gap": "HIGH"}]
     `;
@@ -94,9 +90,12 @@ export async function onRequest(context) {
     throw new Error("All models failed");
 
   } catch (error) {
-    // Če vse odpove, uporabi pametno logiko brez AI
-    // Če je futunatura.si -> Best supplements for health
+    // FALLBACK
     const fallback = [
       { keyword: `best rated products on ${domain}`, gap: "HIGH" },
       { keyword: `${domain.split('.')[0]} discount code`, gap: "LOW" },
-      { keyword: `top competitors to ${domain
+      { keyword: `top competitors to ${domain}`, gap: "MED" }
+    ];
+    return new Response(JSON.stringify(fallback), { headers: { 'Content-Type': 'application/json' } });
+  }
+}
