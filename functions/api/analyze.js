@@ -5,19 +5,17 @@ export async function onRequest(context) {
 
   if (!targetUrl) return new Response(JSON.stringify([]), { status: 400 });
 
-  // Čiščenje domene
+  // Čiščenje
   let domain = targetUrl.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
-  let brand = domain.split('.')[0];
-  brand = brand.charAt(0).toUpperCase() + brand.slice(1);
 
-  // --- TVOJI KLJUČI ---
+  // --- KLJUČI ---
   const GEMINI_KEY = "AIzaSyBGtyvrhLuMxerRVdLUmljnWU7mB-POjtc";
   const SERPER_KEY = "5ddb9fe661387ffb18f471615704b32ddbec0b13";
-  // --------------------
+  // --------------
 
   try {
-    // 1. ISKANJE KONTEKSTA (Serper)
-    // Iščemo splošno o domeni, da vidimo, kaj so (Avtohiša? Trgovina? Blog?)
+    // 1. SERPER: Išči specifično "Cenik", "Akcija", "Produkt"
+    // S tem dobimo boljše podatke kot samo z naslovnico
     const serperResponse = await fetch('https://google.serper.dev/search', {
       method: 'POST',
       headers: {
@@ -25,49 +23,47 @@ export async function onRequest(context) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        q: `site:${domain}`, // Preišči samo to domeno
-        num: 6
+        q: `site:${domain} "cenik" OR "price" OR "shop" OR "servis"`, 
+        num: 8
       })
     });
 
     const serperData = await serperResponse.json();
 
     let siteContext = "";
-    if (serperData.organic && serperData.organic.length > 0) {
+    if (serperData.organic) {
         serperData.organic.forEach(result => {
-            siteContext += `- Title: ${result.title} | Desc: ${result.snippet}\n`;
+             siteContext += `Page: ${result.title} | Snippet: ${result.snippet}\n`;
         });
-    } else {
-        // Če site: iskanje ne vrne nič, poišči samo ime brenda
-        siteContext = `Domain: ${domain}. (Site index empty, inferring from name).`;
     }
 
-    // 2. UNIVERZALNI PROMPT (Pravi AI)
-    // AI-ju naročimo, naj najprej ugotovi NIŠO in JEZIK.
+    // 2. PROMPT: BLACK HAT STRATEGIJA
     const prompt = `
-      Act as an Elite SEO Strategist.
-      I have crawled the website "${domain}" and found this content:
-      
+      You are an Aggressive SEO Strategist.
+      Target Domain: "${domain}"
+      Google Scan Results:
       ${siteContext}
 
-      YOUR TASK:
-      1. Detect the BUSINESS TYPE (e.g., Car Dealership, SaaS, E-commerce, Blog).
-      2. Detect the LANGUAGE of the content (e.g., Slovenian, English, German).
-      3. Generate 3 high-value "Content Gap" keywords that this business needs to target to get more customers.
-
-      CRITICAL RULES:
-      - Keywords must be in the DOMINANT LANGUAGE of the website (if site is Slovenian, keywords must be Slovenian).
-      - Keywords must be specific to their industry (e.g., if Car Dealer -> "servis opel ljubljana", "rabljena vozila").
-      - NO GENERIC NONSENSE. Do not say "pricing" without a product name.
+      YOUR MISSION:
+      Identify 3 "Money Keywords" with HIGH COMMERCIAL INTENT.
       
-      Output STRICT JSON:
+      RULES:
+      1. IGNORE informational keywords (like "history of...", "about...").
+      2. IF LOCAL BUSINESS (e.g. Car Dealer, Service): You MUST include the CITY/COUNTRY inferred from the text (e.g. "Renault servis Ljubljana", "Gume akcija").
+      3. IF E-COMMERCE: Target specific product models + "buy" or "price" (e.g. "Nasiol ZR53 price", "buy nano coating").
+      4. LANGUAGE: Output keywords strictly in the language of the site title (Slovenian for .si, etc).
+      
+      FORBIDDEN:
+      - Do not use the phrase "best alternatives" unless it's a software tool.
+      - Do not use generic brand names alone.
+
+      Output JSON:
       [
-        {"keyword": "...", "gap": "HIGH"},
-        {"keyword": "...", "gap": "MED"},
         {"keyword": "...", "gap": "HIGH"}
       ]
     `;
 
+    // Kličemo stabilen model
     const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -78,7 +74,13 @@ export async function onRequest(context) {
 
     const geminiData = await geminiResponse.json();
 
-    if (geminiData.error) throw new Error(geminiData.error.message);
+    // ČE JE NAPAKA, JO POKAŽI (Brez skrivanja!)
+    if (geminiData.error) {
+        return new Response(JSON.stringify([
+            { keyword: "API ERROR", gap: "!!!" },
+            { keyword: geminiData.error.message, gap: "FIX" }
+        ]), { headers: { 'Content-Type': 'application/json' } });
+    }
 
     const aiText = geminiData.candidates[0].content.parts[0].text;
     const cleanJson = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -88,19 +90,10 @@ export async function onRequest(context) {
     });
 
   } catch (error) {
-    console.log("Error: " + error.message);
-
-    // --- PAMETNI GENERIČNI FALLBACK (Če vse odpove) ---
-    // Tokrat brez "keramičnih premazov". Samo univerzalne poslovne fraze.
-    
-    const universalFallback = [
-      { keyword: `${brand} reviews and rating`, gap: "MED" },
-      { keyword: `best alternatives to ${brand}`, gap: "HIGH" },
-      { keyword: `${brand} contact and support`, gap: "LOW" }
-    ];
-
-    return new Response(JSON.stringify(universalFallback), {
-      headers: { 'Content-Type': 'application/json' }
-    });
+    // Pokaži sistemsko napako, če obstaja
+    return new Response(JSON.stringify([
+        { keyword: "SYSTEM CRASH", gap: "!!!" },
+        { keyword: error.message, gap: "LOGS" }
+    ]), { headers: { 'Content-Type': 'application/json' } });
   }
 }
