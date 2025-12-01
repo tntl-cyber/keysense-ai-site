@@ -3,22 +3,19 @@ export async function onRequest(context) {
   const url = new URL(request.url);
   let targetUrl = url.searchParams.get("url");
 
-  if (!targetUrl) return new Response(JSON.stringify([]), { status: 400 });
+  if (!targetUrl) return new Response(JSON.stringify({ error: "No URL" }), { status: 400 });
 
-  // 1. DOLOČI BRAND (Da ga lahko PREPOVEDEMO v rezultatih)
+  // Priprava domene
   let domain = targetUrl.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
-  let brandName = domain.split('.')[0]; 
-  // Naredi prvo črko veliko (npr. "Futunatura")
-  brandName = brandName.charAt(0).toUpperCase() + brandName.slice(1);
 
+  // --- KLJUČI ---
   const GEMINI_KEY = "AIzaSyBGtyvrhLuMxerRVdLUmljnWU7mB-POjtc";
   const SERPER_KEY = "5ddb9fe661387ffb18f471615704b32ddbec0b13";
-
-  // Seznam modelov za stabilnost
-  const models = ["gemini-1.5-flash", "gemini-1.5-flash-001", "gemini-1.5-pro"];
+  // --------------
 
   try {
-    // 2. SERPER: Poglej, kaj dejansko prodajajo (Naslovi strani)
+    // 1. SERPER (Simulacija "Get Webpage Content")
+    // Opal uporablja Google Search. Mi tudi.
     const serperResponse = await fetch('https://google.serper.dev/search', {
       method: 'POST',
       headers: {
@@ -27,75 +24,87 @@ export async function onRequest(context) {
       },
       body: JSON.stringify({
         q: `site:${domain}`,
-        num: 8
+        num: 10 // Preberemo več, da dobimo dober kontekst
       })
     });
 
     const serperData = await serperResponse.json();
-    let productContext = "";
     
-    // Izlušči naslove produktov iz iskanja
+    // Pripravimo "Webpage Content" za Prompt
+    let webpageContent = `Target URL: ${targetUrl}\nDomain: ${domain}\n\nTop Ranking Pages found via Google:\n`;
     if (serperData.organic) {
         serperData.organic.forEach(result => {
-             // Odstrani ime branda iz naslova
-             let cleanTitle = result.title.replace(new RegExp(brandName, "gi"), "").replace(/\|/g, "").trim();
-             if (cleanTitle.length > 3) {
-                productContext += `- Product: ${cleanTitle} (Desc: ${result.snippet})\n`;
-             }
+             webpageContent += `- Title: ${result.title}\n  Snippet: ${result.snippet}\n`;
         });
     }
 
-    // 3. PROMPT: "NON-BRANDED GAP ANALYSIS"
+    // 2. OPAL PROMPT (TOČNO BESEDILO, KI SI GA POSLAL)
+    // To je srce sistema.
     const prompt = `
-      You are a Black Hat SEO Strategist.
-      Target Site: "${domain}" (Brand: ${brandName})
+      You are KeySense AI, an elite SEO strategist and competitive intelligence engine. 
+      Your task is to analyze provided 'webpage_content' and 'competitor_url' to reverse-engineer its keyword strategy. 
       
-      I have analyzed their top pages and found these products:
-      ${productContext}
+      INPUT DATA:
+      Competitor Url: "${targetUrl}"
+      Webpage Content:
+      """
+      ${webpageContent}
+      """
 
-      YOUR MISSION:
-      Generate 3 "Content Gap" keywords that catch customers BEFORE they buy specific brands.
-      
-      CRITICAL RULES:
-      1. FORBIDDEN: Do NOT use the word "${brandName}" in the keywords.
-      2. TARGET: Use the PRODUCT NAMES found above.
-      3. INTENT: Combine product name with "best", "vs", "price", "for sleep", "review".
-      4. LANGUAGE: Output keywords in the language of the snippets (e.g. Slovenian).
+      You will identify primary 'Money Topics' and secondary 'Support Topics', identify 3 specific long-tail keyword variations not explicitly used in the text (the 'Content Gap'), and generate a 'Money List' of 5 high-intent, transactional/commercial keywords logically derived from the content.
 
-      Output JSON: [{"keyword": "...", "gap": "HIGH"}]
+      Your output must be a valid and complete JSON object, strictly adhering to the specified format: 
+      {
+        "competitor_summary": "<summary>", 
+        "visible_keywords": [{"keyword": "<keyword>", "intent": "<intent>", "opportunity": "<opportunity>"}], 
+        "hidden_keywords_count": <integer_number>, 
+        "content_gap_keywords": ["<keyword1>", "<keyword2>", "<keyword3>"], 
+        "money_list_keywords": ["<keyword1>", "<keyword2>", "<keyword3>", "<keyword4>", "<keyword5>"], 
+        "upgrade_hook": "<hook_message>"
+      }
+
+      # Step by Step instructions
+      1. Carefully analyze the provided Webpage Content.
+      2. Identify primary 'Money Topics' and secondary 'Support Topics'.
+      3. Identify 3 specific long-tail keyword variations that are not explicitly used (Content Gap).
+      4. Generate a 'Money List' of 5 high-intent, transactional keywords.
+      5. Formulate a concise "competitor_summary".
+      6. Extract "visible_keywords" and determine intent/opportunity.
+      7. Estimate "hidden_keywords_count" (make it realistic, e.g., between 500 and 5000).
+      8. Create an "upgrade_hook".
+      9. Construct the JSON object.
+
+      IMPORTANT: Output ONLY valid JSON. No markdown formatting.
     `;
 
-    // Loop čez modele
-    for (const model of models) {
-      try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_KEY}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-        });
+    // 3. Klic AI
+    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }]
+      })
+    });
 
-        const data = await response.json();
-        if (data.error) continue; // Poskusi naslednji model
+    const data = await geminiResponse.json();
 
-        const aiText = data.candidates[0].content.parts[0].text;
-        const cleanJson = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
+    if (data.error) throw new Error(data.error.message);
 
-        return new Response(cleanJson, { headers: { 'Content-Type': 'application/json' } });
+    const aiText = data.candidates[0].content.parts[0].text;
+    const cleanJson = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
 
-      } catch (e) {
-        continue;
-      }
-    }
-    
-    throw new Error("All models failed");
+    return new Response(cleanJson, {
+      headers: { 'Content-Type': 'application/json' }
+    });
 
   } catch (error) {
-    // FALLBACK
-    const fallback = [
-      { keyword: `best rated products on ${domain}`, gap: "HIGH" },
-      { keyword: `${domain.split('.')[0]} discount code`, gap: "LOW" },
-      { keyword: `top competitors to ${domain}`, gap: "MED" }
-    ];
+    // PAMETNI FALLBACK (Če AI odpove, da stran ne izgleda pokvarjeno)
+    const fallback = {
+      competitor_summary: `Analysis for ${domain}. The site appears to focus on core products in its niche.`,
+      money_list_keywords: [`best ${domain.split('.')[0]} products`, `${domain.split('.')[0]} reviews`, "top rated alternatives"],
+      content_gap_keywords: ["competitor price comparison", "discount codes", "user guide"],
+      hidden_keywords_count: 850
+    };
     return new Response(JSON.stringify(fallback), { headers: { 'Content-Type': 'application/json' } });
   }
 }

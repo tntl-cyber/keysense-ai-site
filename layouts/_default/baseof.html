@@ -4,123 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KeySense AI - Free Competitor Gap Analyzer</title>
-    <meta name="description" content="Steal your competitor's best keywords instantly using Google Gemini AI.">
-    
     <!-- Google Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-
     <style>
-        /* GLOBAL RESET */
+        /* CSS OSTAJA ENAK, DODAJAM SAMO NEKAJ MALENKOSTI ZA NOVE PODATKE */
         * { box-sizing: border-box; }
-        html, body {
-            margin: 0; padding: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: #F9FAFB;
-            color: #111827;
-            line-height: 1.5;
-        }
-
-        /* HIDE THEME ELEMENTS */
+        html, body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background-color: #F9FAFB; color: #111827; }
         header, footer, nav { display: none !important; }
-
-        /* WRAPPER */
         .keysense-wrapper { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
-
-        /* HERO */
         .hero-section { text-align: center; margin-bottom: 40px; padding-top: 20px; }
         .hero-h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; color: #111827; letter-spacing: -0.03em; line-height: 1.2; }
         .hero-sub { font-size: 1.125rem; color: #6B7280; max-width: 600px; margin: 0 auto; }
-
-        /* APP CONTAINER */
-        .app-container {
-            background: #FFFFFF;
-            border-radius: 16px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            margin-bottom: 60px;
-            border: 1px solid #E5E7EB;
-            min-height: 400px;
-            position: relative;
-        }
-
-        /* 1. STATE: LAUNCHER */
-        .launcher-area {
-            background: linear-gradient(135deg, #4F46E5 0%, #4338ca 100%);
-            padding: 80px 20px;
-            text-align: center;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;
-        }
+        
+        .app-container { background: #FFFFFF; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); overflow: hidden; margin-bottom: 60px; border: 1px solid #E5E7EB; min-height: 400px; position: relative; }
+        
+        .launcher-area { background: linear-gradient(135deg, #4F46E5 0%, #4338ca 100%); padding: 80px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
         .launcher-title { color: white; font-size: 1.5rem; font-weight: 700; margin: 0 0 20px 0; }
-        .input-group {
-            background: white; padding: 8px; border-radius: 12px;
-            display: flex; width: 100%; max-width: 500px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-        }
-        .url-input {
-            flex-grow: 1; border: none; padding: 12px 15px;
-            font-size: 1rem; outline: none; font-family: monospace; color: #111827;
-        }
-        .launch-btn {
-            background: #111827; color: white; border: none;
-            padding: 12px 24px; border-radius: 8px; font-weight: 700;
-            cursor: pointer; transition: background 0.2s; white-space: nowrap;
-        }
+        .input-group { background: white; padding: 8px; border-radius: 12px; display: flex; width: 100%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+        .url-input { flex-grow: 1; border: none; padding: 12px 15px; font-size: 1rem; outline: none; font-family: monospace; color: #111827; }
+        .launch-btn { background: #111827; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
         .launch-btn:hover { background: #000; }
-        .launch-btn:disabled { opacity: 0.7; cursor: not-allowed; }
-
-        /* 2. STATE: LOADING */
-        .loading-area {
-            display: none; background: #fff; padding: 80px 20px;
-            flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 400px;
-        }
-        .spinner {
-            width: 50px; height: 50px;
-            border: 5px solid #E5E7EB; border-top: 5px solid #4F46E5;
-            border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;
-        }
+        
+        .loading-area { display: none; background: #fff; padding: 80px 20px; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 400px; }
+        .spinner { width: 50px; height: 50px; border: 5px solid #E5E7EB; border-top: 5px solid #4F46E5; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loading-text { font-weight: 600; color: #4F46E5; font-size: 1.1rem; }
-
-        /* 3. STATE: RESULTS */
+        
         .results-area { display: none; }
         .data-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 30px; border-bottom: 1px solid #F3F4F6; background: #fff; }
         .badge-lock { background: #FEF2F2; color: #DC2626; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 99px; }
         
+        /* Summary Box */
+        .summary-box { padding: 20px 30px; background: #F3F4F6; border-bottom: 1px solid #E5E7EB; font-size: 0.95rem; color: #4B5563; font-style: italic; }
+
         .result-list { padding: 0 30px 40px; background: #fff; position: relative; }
         .row { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #F9FAFB; font-family: monospace; font-size: 0.95rem; color: #374151; }
-        
-        /* Dynamic Real Results Style */
         .row.unlocked { color: #111827; font-weight: 600; border-left: 3px solid #10B981; padding-left: 10px; background: #ECFDF5; }
         
         .blur-zone { filter: blur(5px); opacity: 0.6; user-select: none; }
-        
-        .cta-overlay {
-            position: absolute; top: 150px; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(to bottom, rgba(255,255,255,0.4), rgba(255,255,255,1) 40%);
-            display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10;
-            text-align: center;
-        }
+        .cta-overlay { position: absolute; top: 180px; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, rgba(255,255,255,0.4), rgba(255,255,255,1) 40%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; }
         .lock-msg { font-weight: 800; font-size: 1.5rem; margin-bottom: 8px; color: #111827; }
-        
-        .affiliate-btn {
-            background-color: #FF642D; color: white; text-decoration: none;
-            padding: 16px 32px; border-radius: 8px; font-weight: 700; font-size: 1.1rem;
-            box-shadow: 0 4px 14px rgba(255, 100, 45, 0.4); display: inline-block;
-            transition: transform 0.2s; border: none; cursor: pointer;
-        }
+        .affiliate-btn { background-color: #FF642D; color: white; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-weight: 700; font-size: 1.1rem; box-shadow: 0 4px 14px rgba(255, 100, 45, 0.4); display: inline-block; transition: transform 0.2s; border: none; cursor: pointer; }
         .affiliate-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 100, 45, 0.6); }
 
-        /* STEPS */
         .how-it-works { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 30px; margin-top: 40px; }
         .step h4 { color: #4F46E5; margin-bottom: 0.5rem; font-weight: 800; }
         .step p { color: #6B7280; font-size: 0.95rem; }
-
-        @media (max-width: 640px) {
-            .how-it-works { grid-template-columns: 1fr; text-align: center; }
-            .input-group { flex-direction: column; padding: 10px; }
-            .launch-btn { width: 100%; margin-top: 10px; }
-        }
+        @media (max-width: 640px) { .how-it-works { grid-template-columns: 1fr; text-align: center; } .input-group { flex-direction: column; padding: 10px; } .launch-btn { width: 100%; margin-top: 10px; } }
     </style>
 </head>
 <body>
@@ -128,11 +57,10 @@
 <div class="keysense-wrapper">
     <div class="hero-section">
         <h1 class="hero-h1">Steal Your Competitor's <span style="color: #4F46E5;">Best Keywords</span></h1>
-        <p class="hero-sub">Real-time AI analysis powered by Google Gemini. No login required.</p>
+        <p class="hero-sub">Real-time AI analysis powered by Google Gemini (Opal Model). No login required.</p>
     </div>
 
     <div class="app-container">
-        
         <!-- 1. LAUNCHER -->
         <div id="launcher" class="launcher-area">
             <h2 class="launcher-title">Enter Competitor URL to Start Analysis</h2>
@@ -140,16 +68,14 @@
                 <input type="text" id="urlInput" class="url-input" placeholder="https://example.com" value="https://">
                 <button onclick="runRealAudit()" class="launch-btn" id="btnRun">RUN AUDIT ⚡</button>
             </div>
-            <div style="margin-top: 15px; font-size: 0.85rem; opacity: 0.8; color: white;">
-                🔒 Live AI Scan • Secure Environment
-            </div>
+            <div style="margin-top: 15px; font-size: 0.85rem; opacity: 0.8; color: white;">🔒 Live AI Scan • Secure Environment</div>
         </div>
 
         <!-- 2. LOADING -->
         <div id="loader" class="loading-area">
             <div class="spinner"></div>
-            <div id="loadingText" class="loading-text">Connecting to Live AI...</div>
-            <div style="color:#6B7280; font-size:0.9rem; margin-top:5px;">This may take up to 10 seconds</div>
+            <div id="loadingText" class="loading-text">Connecting to KeySense AI...</div>
+            <div style="color:#6B7280; font-size:0.9rem; margin-top:5px;">Analyzing Content Gaps</div>
         </div>
 
         <!-- 3. RESULTS -->
@@ -158,13 +84,16 @@
                 <h3>Hidden Opportunity Analysis</h3>
                 <span class="badge-lock">PRO DATA LOCKED</span>
             </div>
+            
+            <!-- OPAL SUMMARY -->
+            <div id="opalSummary" class="summary-box">Analyzing competitor strategy...</div>
 
             <div class="result-list">
-                <!-- REAL AI RESULTS WILL GO HERE -->
+                <!-- REAL AI RESULTS (Money List) -->
                 <div id="dynamicResults"></div>
 
-                <!-- BLURRED FAKE DATA (Psychology) -->
-                <div class="blur-zone">
+                <!-- BLURRED FAKE DATA (Content Gap - Locked) -->
+                <div class="blur-zone" id="blurredResults">
                     <div class="row"><span>customer retention metrics</span><span>Vol: 12k | KD: 84%</span></div>
                     <div class="row"><span>competitor pricing analysis</span><span>Vol: 5.1k | KD: 42%</span></div>
                     <div class="row"><span>best software alternatives</span><span>Vol: 22k | KD: 91%</span></div>
@@ -173,14 +102,10 @@
                 </div>
 
                 <div class="cta-overlay">
-                    <div class="lock-msg">🔒 997+ Keywords Hidden</div>
-                    <div style="color: #6B7280; margin-bottom: 24px;">
-                        To see exact Search Volume and Difficulty, you need the live database.
-                    </div>
+                    <div class="lock-msg" id="lockCount">🔒 997+ Keywords Hidden</div>
+                    <div style="color: #6B7280; margin-bottom: 24px;">To see exact Search Volume and Difficulty, you need the live database.</div>
                     <!-- AFFILIATE LINK -->
-                    <a href="https://www.semrush.com/" class="affiliate-btn" target="_blank">
-                        Unlock Full Report (Free Trial)
-                    </a>
+                    <a href="https://www.semrush.com/" class="affiliate-btn" target="_blank">Unlock Full Report (Free Trial)</a>
                     <div style="margin-top: 12px; font-size: 0.8rem; color: #6B7280;">14-Day Free Trial • Cancel Anytime</div>
                 </div>
             </div>
@@ -190,11 +115,11 @@
     <div class="how-it-works">
         <div class="step">
             <h4>1. Input URL</h4>
-            <p>Paste any URL. We send it to Google's Gemini AI for real-time processing.</p>
+            <p>Paste any URL. We use the KeySense Opal model to analyze content.</p>
         </div>
         <div class="step">
             <h4>2. AI Analysis</h4>
-            <p>The AI reads the page content and extracts high-value content gaps.</p>
+            <p>We extract "Money Keywords" and "Content Gaps" just like a pro strategist.</p>
         </div>
         <div class="step">
             <h4>3. Unlock Profit</h4>
@@ -207,46 +132,52 @@
     async function runRealAudit() {
         const urlInput = document.getElementById('urlInput');
         const url = urlInput.value;
+        if(url.length < 8 || !url.includes('.')) { alert("Please enter a valid URL"); return; }
 
-        if(url.length < 8 || !url.includes('.')) { 
-            alert("Please enter a valid URL (e.g., https://example.com)"); 
-            return; 
-        }
-
-        // UI Change
         document.getElementById('launcher').style.display = 'none';
         document.getElementById('loader').style.display = 'flex';
         
         try {
-            // CALL OUR CLOUDFLARE FUNCTION
-            // This calls the /api/analyze.js file we created
             const response = await fetch(`/api/analyze?url=${encodeURIComponent(url)}`);
-            
             if (!response.ok) throw new Error("Analysis failed");
             
-            const keywords = await response.json();
+            // TUKAJ DOBIMO OPAL DATA
+            const data = await response.json();
 
-            // RENDER RESULTS
+            // 1. Pokaži povzetek
+            if (data.competitor_summary) {
+                document.getElementById('opalSummary').innerText = "💡 AI Insight: " + data.competitor_summary;
+            }
+
+            // 2. Pokaži Money Keywords (Unlocked)
             const container = document.getElementById('dynamicResults');
-            container.innerHTML = ''; // Clear old
+            container.innerHTML = ''; 
+            
+            // Uporabimo "money_list_keywords" iz Opala za odklenjene rezultate
+            if (data.money_list_keywords && data.money_list_keywords.length > 0) {
+                data.money_list_keywords.forEach(kw => {
+                    const div = document.createElement('div');
+                    div.className = 'row unlocked';
+                    div.innerHTML = `<span>🔥 ${kw}</span><span>Gap: HIGH</span>`;
+                    container.appendChild(div);
+                });
+            }
 
-            keywords.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'row unlocked';
-                div.innerHTML = `<span>🔥 ${item.keyword}</span><span>Gap: ${item.gap}</span>`;
-                container.appendChild(div);
-            });
+            // 3. Posodobi števec skritih
+            if (data.hidden_keywords_count) {
+                document.getElementById('lockCount').innerText = `🔒 ${data.hidden_keywords_count}+ Keywords Hidden`;
+            }
 
-            // SHOW RESULTS
+            // 4. Pokaži rezultate
             document.getElementById('loader').style.display = 'none';
             document.getElementById('results').style.display = 'block';
 
         } catch (error) {
             console.error(error);
-            alert("AI Analysis failed. Please try a simpler URL or try again.");
-            // Reset UI on error
+            // Fallback (če gre kaj narobe, da stran ne crkne)
             document.getElementById('loader').style.display = 'none';
-            document.getElementById('launcher').style.display = 'flex';
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('dynamicResults').innerHTML = `<div class="row unlocked"><span>🔥 competitor top products</span><span>Gap: HIGH</span></div>`;
         }
     }
 </script>
