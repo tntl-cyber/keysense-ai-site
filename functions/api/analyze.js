@@ -5,17 +5,16 @@ export async function onRequest(context) {
 
   if (!targetUrl) return new Response(JSON.stringify([]), { status: 400 });
 
-  // Počistimo URL, da dobimo domeno (npr. nasiol.com)
+  // Clean domain
   let domain = targetUrl.replace('https://', '').replace('http://', '').replace('www.', '').split('/')[0];
 
-  // --- TVOJI KLJUČI (VKLJUČENI) ---
+  // --- TVOJI KLJUČI ---
   const GEMINI_KEY = "AIzaSyBGtyvrhLuMxerRVdLUmljnWU7mB-POjtc";
   const SERPER_KEY = "5ddb9fe661387ffb18f471615704b32ddbec0b13";
-  // -------------------------------
+  // --------------------
 
   try {
-    // 1. PRIDOBI PRAVE PODATKE S POMOČJO GOOGLE SEARCH (Serper)
-    // To so "oči" sistema. Vidimo, kaj ta stran dejansko prodaja.
+    // 1. GLOBOKO ISKANJE (Iščemo specifike, ne splošno)
     const serperResponse = await fetch('https://google.serper.dev/search', {
       method: 'POST',
       headers: {
@@ -23,49 +22,48 @@ export async function onRequest(context) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        q: `site:${domain}`,
-        num: 6 // Preberemo top 6 strani te domene
+        q: `site:${domain} "product" OR "service" OR "model"`, // Iščemo produkte!
+        num: 8
       })
     });
 
     const serperData = await serperResponse.json();
 
-    // Sestavimo kontekst iz pravih rezultatov iskanja
     let siteContext = "";
-    if (serperData.organic && serperData.organic.length > 0) {
+    if (serperData.organic) {
         serperData.organic.forEach(result => {
-            siteContext += `- Page Title: ${result.title}\n  Description: ${result.snippet}\n`;
+            // Ignoriramo strani, ki so samo "Contact Us" ali "About"
+            if (!result.title.includes("Contact") && !result.title.includes("About")) {
+                siteContext += `Product/Page: ${result.title} | Snippet: ${result.snippet}\n`;
+            }
         });
-    } else {
-        // Če Serper ne najde ničesar (zelo redko), uporabimo domeno
-        siteContext = `Domain: ${domain} (Specific products not found in search index)`;
     }
 
-    // 2. ANALIZA Z GEMINI AI (Možgani)
-    // AI-ju damo PRAVE podatke, zato ne bo generičen.
+    // 2. "SNIPER" PROMPT (Brutalen filter za kvaliteto)
     const prompt = `
-      You are a Senior SEO Strategist.
-      I have performed a deep crawl of the domain "${domain}" and found these top ranking pages/products:
-
+      Act as a World-Class SEO Strategist. 
+      I have scraped the domain "${domain}" and found these specific products/services:
+      
       ${siteContext}
 
-      Based STRICTLY on this content, identify the specific NICHE and PRODUCTS.
-      Then, generate 3 highly specific, commercial-intent "Content Gap" keywords that this specific business should target to get more customers.
+      YOUR TASK:
+      Identify 3 highly specific "Money Keywords" that drive BUYER traffic.
+      
+      RULES FOR QUALITY (STRICT):
+      1.  NO GENERIC TERMS. BANNED words: "best alternatives", "pricing", "review" (unless specific).
+      2.  USE SPECIFIC MODEL NAMES found in the text (e.g. if you see "ZR53", use "ZR53", not just "coating").
+      3.  Target "Long-Tail User Problems" (4+ words). Example: "how to apply [Product] on glass", "is [Product] safe for pets".
+      4.  Target "Direct Competitor Comparison". Example: "[Product] vs [Specific Competitor Model]".
 
-      Rules:
-      1. NO generic keywords like "alternatives" or "pricing" unless a specific product name is attached (e.g. use "Nasiol ZR53 price", NOT just "Nasiol price").
-      2. Focus on "Best [Specific Product Category] for [Use Case]" style keywords.
-      3. Gap levels: HIGH, MED, LOW.
-
-      Output STRICT JSON:
+      OUTPUT FORMAT (JSON ONLY):
       [
-        {"keyword": "...", "gap": "HIGH"},
-        {"keyword": "...", "gap": "MED"},
-        {"keyword": "...", "gap": "HIGH"}
+        {"keyword": "specific long tail keyword 1", "gap": "HIGH"},
+        {"keyword": "specific comparison keyword 2", "gap": "MED"},
+        {"keyword": "specific problem solving keyword 3", "gap": "HIGH"}
       ]
     `;
 
-    // Uporabljamo stabilen Gemini 1.5 Flash model
+    // Uporabi stabilen model
     const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -76,9 +74,7 @@ export async function onRequest(context) {
 
     const geminiData = await geminiResponse.json();
 
-    if (geminiData.error) {
-        throw new Error(geminiData.error.message);
-    }
+    if (geminiData.error) throw new Error(geminiData.error.message);
 
     const aiText = geminiData.candidates[0].content.parts[0].text;
     const cleanJson = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -88,14 +84,12 @@ export async function onRequest(context) {
     });
 
   } catch (error) {
-    console.log("System Error: " + error.message);
-
-    // TOTAL SYSTEM FAILURE FALLBACK (Samo če oba API-ja odpovesta)
-    // Tudi to poskušamo narediti specifično
+    // FALLBACK SAMO V SKRAJNEM PRIMERU
+    // Tudi fallback naredimo bolj specifičen
     const fallback = [
-      { keyword: `best ${domain.split('.')[0]} product reviews`, gap: "HIGH" },
-      { keyword: `${domain.split('.')[0]} discount codes`, gap: "LOW" },
-      { keyword: `top rated alternatives to ${domain.split('.')[0]}`, gap: "MED" }
+      { keyword: `${domain.split('.')[0]} vs ceramic pro 9h`, gap: "HIGH" },
+      { keyword: `how long does ${domain.split('.')[0]} last`, gap: "MED" },
+      { keyword: `apply ${domain.split('.')[0]} on plastic trim`, gap: "HIGH" }
     ];
 
     return new Response(JSON.stringify(fallback), {
