@@ -6,112 +6,97 @@ export async function onRequest(context) {
   if (!targetUrl) return new Response(JSON.stringify({ error: "No URL" }), { status: 400 });
   if (!targetUrl.startsWith('http')) targetUrl = 'https://' + targetUrl;
 
-  // --- KLJUČI ---
   const GEMINI_KEY = "AIzaSyBGtyvrhLuMxerRVdLUmljnWU7mB-POjtc";
-  const SERPER_KEY = "5ddb9fe661387ffb18f471615704b32ddbec0b13";
-  // --------------
 
   try {
-    // 1. KORAK: PRIDOBI CELOTNO VSEBINO STRANI (Kot Opal "Get Webpage")
-    // Uporabljamo r.jina.ai, ki prebere celo stran in vrne čist tekst.
-    let fullPageContent = "";
-    
+    // 1. JINA READER (To je tvoj "Get Webpage" node)
+    let fullContent = "";
     try {
-      const scrapeResponse = await fetch(`https://r.jina.ai/${targetUrl}`, {
-        method: 'GET',
-        headers: {
-          'User-Agent': 'KeySenseAI/1.0',
-          'X-With-Images-Summary': 'false',
-          'X-With-Links-Summary': 'false'
+      const scrape = await fetch(`https://r.jina.ai/${targetUrl}`, {
+        headers: { 
+            'User-Agent': 'KeySense/1.0',
+            'X-With-Images-Summary': 'false',
+            'X-With-Links-Summary': 'false' 
         }
       });
-      
-      if (scrapeResponse.ok) {
-        const text = await scrapeResponse.text();
-        // Vzamemo prvih 15.000 znakov (dovolj za AI, da dojame bistvo)
-        fullPageContent = text.substring(0, 15000); 
-      }
+      fullContent = await scrape.text();
+      // Omejimo dolžino, da ne pretiravamo, a dovolj za analizo
+      fullContent = fullContent.substring(0, 30000); 
     } catch (e) {
-      console.log("Scrape failed, falling back to Serper");
+      throw new Error("Could not scrape website content.");
     }
 
-    // 2. KORAK: FALLBACK NA SERPER (Če Jina ne dela ali stran blokira)
-    // Če je Jina vrnila prazno, uporabimo Google Search podatke
-    if (fullPageContent.length < 500) {
-       const serperResponse = await fetch('https://google.serper.dev/search', {
-        method: 'POST',
-        headers: {
-          'X-API-KEY': SERPER_KEY,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ q: `site:${targetUrl}`, num: 6 })
-       });
-       const serperData = await serperResponse.json();
-       if (serperData.organic) {
-          serperData.organic.forEach(r => fullPageContent += `Title: ${r.title}\nDesc: ${r.snippet}\n`);
-       }
-    }
-
-    // 3. OPAL PROMPT (Tvoj originalni recept)
-    // Sedaj AI dobi dejanski tekst strani, zato bodo rezultati specifični.
+    // 2. MEGA-PROMPT (Vsi tvoji Opal koraki združeni v enega)
     const prompt = `
-      You are KeySense AI, an elite SEO strategist.
-      Your task: Analyze 'webpage_content' to reverse-engineer keyword strategy.
+      You are KeySense AI, an elite SEO strategist. 
+      Analyze the provided website content strictly.
 
       TARGET URL: "${targetUrl}"
-      WEBPAGE CONTENT:
+      WEBSITE CONTENT:
       """
-      ${fullPageContent}
+      ${fullContent}
       """
 
-      INSTRUCTIONS:
-      1. Analyze the content deeply. Identify specific products, models, and unique selling points.
-      2. Generate 3 specific "Content Gap" keywords (High opportunity, not used in text).
-      3. Generate a 'Money List' of 5 high-intent transactional keywords using SPECIFIC PRODUCT NAMES found in text.
-      4. If the site is in a specific language (e.g. Slovenian), output keywords in that language.
-      
-      OUTPUT FORMAT (Strict JSON):
+      You must perform 3 distinct tasks (like a workflow) and combine them into one JSON output.
+
+      TASK 1: SEO STRATEGY ANALYSIS
+      - Identify 'Money Topics' and 'Content Gaps'.
+      - Generate 5 high-intent keywords found in the text.
+      - Generate 3 "Gap" keywords (what they are missing).
+      - Estimate hidden keywords count.
+
+      TASK 2: OPTIMIZATION RECOMMENDATIONS
+      - Based on the analysis, create 3 specific, actionable technical or content recommendations to improve ranking.
+
+      TASK 3: SEO OPTIMIZED ARTICLE TITLES
+      - Suggest 3 titles for new blog articles that would cover the "Content Gap".
+
+      OUTPUT FORMAT (Strict JSON, no markdown):
       {
-        "competitor_summary": "Short analysis of their strategy...",
-        "money_list_keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
-        "content_gap_keywords": ["gap_keyword1", "gap_keyword2", "gap_keyword3"],
-        "hidden_keywords_count": 1250
+        "competitor_summary": "A concise executive summary of what this business does and their current SEO stance.",
+        "visible_keywords": [
+            {"keyword": "Example Keyword", "intent": "Transactional", "opportunity": "High"}
+        ],
+        "content_gap_keywords": ["Gap Keyword 1", "Gap Keyword 2", "Gap Keyword 3"],
+        "money_list_keywords": ["Money Keyword 1", "Money Keyword 2", "Money Keyword 3", "Money Keyword 4", "Money Keyword 5"],
+        "hidden_keywords_count": 1240,
+        "upgrade_hook": "Unlock the full database of 1240+ keywords to dominate this niche.",
+        "recommendations": [
+            {"title": "Recommendation 1", "desc": "Details on how to fix..."},
+            {"title": "Recommendation 2", "desc": "Details on how to fix..."},
+            {"title": "Recommendation 3", "desc": "Details on how to fix..."}
+        ],
+        "article_ideas": [
+            {"title": "Article Title 1", "outline": "Brief outline of what to write..."},
+            {"title": "Article Title 2", "outline": "Brief outline of what to write..."},
+            {"title": "Article Title 3", "outline": "Brief outline of what to write..."}
+        ]
       }
     `;
 
-    // 4. KLIC GEMINI AI
-    // Uporabljamo model Flash (001), ker je hiter in podpira veliko teksta
-    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent?key=${GEMINI_KEY}`, {
+    // 3. KLIC GEMINI
+    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }]
-      })
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
     });
 
     const data = await geminiResponse.json();
-
-    if (data.error) {
-      // Zadnji obrambni zid: Če AI odpove, vrnemo pameten fallback
-      throw new Error("AI Quota or Error");
-    }
+    if (data.error) throw new Error(data.error.message);
 
     const aiText = data.candidates[0].content.parts[0].text;
     const cleanJson = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
 
-    return new Response(cleanJson, {
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return new Response(cleanJson, { headers: { 'Content-Type': 'application/json' } });
 
   } catch (error) {
-    // FALLBACK (Da uporabnik nikoli ne vidi napake)
-    let domain = targetUrl.replace('https://', '').replace('www.', '').split('/')[0];
-    const fallback = {
-      competitor_summary: `Could not deep-scan ${domain}, but analyzing market position...`,
-      money_list_keywords: [`best alternatives to ${domain}`, `${domain} pricing`, `buy ${domain.split('.')[0]} online`],
-      content_gap_keywords: ["competitor comparisons", "user reviews", "discount codes"],
-      hidden_keywords_count: 500
-    };
-    return new Response(JSON.stringify(fallback), { headers: { 'Content-Type': 'application/json' } });
+    // Fallback samo če vse odpove
+    return new Response(JSON.stringify({
+        competitor_summary: "Analysis failed due to high load.",
+        money_list_keywords: ["Error retrieving data"],
+        content_gap_keywords: [],
+        recommendations: [],
+        article_ideas: []
+    }), { headers: { 'Content-Type': 'application/json' } });
   }
 }
