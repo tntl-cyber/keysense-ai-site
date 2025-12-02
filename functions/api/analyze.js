@@ -1,49 +1,51 @@
 export async function onRequest(context) {
-  const { request } = context;
+  const { request, env } = context; // Dodan 'env' za dostop do skritih ključev
   const url = new URL(request.url);
   let targetUrl = url.searchParams.get("url");
 
   if (!targetUrl) return new Response(JSON.stringify({ error: "No URL" }), { status: 400 });
   if (!targetUrl.startsWith('http')) targetUrl = 'https://' + targetUrl;
 
-  // --- TVOJ NOVI API KLJUČ ---
-  const GEMINI_KEY = "AIzaSyBwo5W7XD2J04YrcwQQEPWwqDxutwT5cms";
-  const SERPER_KEY = "5ddb9fe661387ffb18f471615704b32ddbec0b13";
+  // --- PREVZEM KLJUČEV IZ CLOUDFLARE NASTAVITEV ---
+  // Ključi niso več v kodi, ampak v "Environment Variables"
+  const GEMINI_KEY = env.GEMINI_API_KEY; 
+  const SERPER_KEY = env.SERPER_API_KEY; // Tudi tega bova skrila
+
+  if (!GEMINI_KEY || !SERPER_KEY) {
+      return new Response(JSON.stringify({
+          competitor_summary: "System Error: API Keys are missing in Cloudflare Settings.",
+          money_list_keywords: ["Config Error"],
+          content_gap_keywords: [],
+          recommendations: [],
+          article_ideas: []
+      }), { headers: { 'Content-Type': 'application/json' } });
+  }
+
+  // SEZNAM MODELOV
+  const candidateModels = [
+    "gemini-1.5-flash",
+    "gemini-1.5-flash-001",
+    "gemini-1.5-flash-latest",
+    "gemini-1.5-pro",
+    "gemini-pro"
+  ];
 
   try {
-    // 1. AUTO-DISCOVERY: VPRAŠAJ GOOGLE, KATERI MODEL DELA
-    // To reši problem "Model not found" za vedno.
-    let modelName = "models/gemini-1.5-flash"; // Privzeto
+    // 1. AUTO-DISCOVERY MODELA
+    let modelName = "models/gemini-1.5-flash"; 
     try {
+        // Poskusimo ugotoviti, kateri model je na voljo za ta ključ
         const listResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_KEY}`);
         const listData = await listResp.json();
-        
         if (listData.models) {
-            // Poišči prvega Gemini, ki podpira generiranje vsebine
-            // Preferiramo "flash" za hitrost, če ne, vzamemo "pro"
-            const preferredModel = listData.models.find(m => 
-                m.name.includes("gemini") && 
-                m.name.includes("flash") &&
-                m.supportedGenerationMethods.includes("generateContent")
-            );
-            
-            const backupModel = listData.models.find(m => 
-                m.name.includes("gemini") && 
-                m.supportedGenerationMethods.includes("generateContent")
-            );
-
-            if (preferredModel) {
-                modelName = preferredModel.name;
-            } else if (backupModel) {
-                modelName = backupModel.name;
-            }
-            console.log("Auto-discovered Model:", modelName);
+            const preferred = listData.models.find(m => m.name.includes("flash") && m.supportedGenerationMethods.includes("generateContent"));
+            if (preferred) modelName = preferred.name;
         }
     } catch (e) {
-        console.log("Discovery failed, using default.");
+        // Ignoriramo in uporabimo default ali loop
     }
 
-    // 2. VSEBINA (Jina + Serper Fallback)
+    // 2. VSEBINA (Jina + Serper)
     let contextText = "";
     let source = "Google Context";
     const controller = new AbortController();
@@ -51,11 +53,7 @@ export async function onRequest(context) {
 
     try {
       const scrape = await fetch(`https://r.jina.ai/${targetUrl}`, {
-        headers: { 
-            'User-Agent': 'KeySense/1.0',
-            'X-With-Images-Summary': 'false',
-            'X-With-Links-Summary': 'false' 
-        },
+        headers: { 'User-Agent': 'KeySense/1.0', 'X-With-Images-Summary': 'false' },
         signal: controller.signal
       });
       if (scrape.ok) {
@@ -63,11 +61,7 @@ export async function onRequest(context) {
         contextText = text.replace(/\s+/g, ' ').substring(0, 20000); 
         source = "Full Website Content";
       }
-    } catch (e) {
-      // Ignore Jina fail
-    } finally {
-      clearTimeout(timeoutId);
-    }
+    } catch (e) {} finally { clearTimeout(timeoutId); }
 
     if (!contextText || contextText.length < 500) {
        const serper = await fetch('https://google.serper.dev/search', {
@@ -81,7 +75,7 @@ export async function onRequest(context) {
        }
     }
 
-    // 3. OPAL PROMPT (Tvoj originalni recept)
+    // 3. OPAL PROMPT
     const prompt = `
       Act as KeySense AI, an elite SEO strategist.
       Analyze this website content (${source}):
@@ -114,32 +108,40 @@ export async function onRequest(context) {
       }
     `;
 
-    // 4. KLIC GEMINI (Z uporabo odkritega imena modela)
-    // Preverimo, če modelName že vsebuje 'models/', sicer dodamo
-    const finalModel = modelName.startsWith('models/') ? modelName : `models/${modelName}`;
-    
-    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/${finalModel}:generateContent?key=${GEMINI_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-    });
+    // 4. MODEL HUNTER LOOP
+    let lastError = "";
+    // Dodamo še auto-discovered model na začetek seznama
+    const allModels = [modelName, ...candidateModels];
+    // Odstranimo duplikate
+    const uniqueModels = [...new Set(allModels)];
 
-    const data = await geminiResponse.json();
+    for (const model of uniqueModels) {
+        try {
+            // Popravek imena modela za URL
+            const finalModel = model.startsWith('models/') ? model : `models/${model}`;
+            
+            const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/${finalModel}:generateContent?key=${GEMINI_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            });
 
-    if (data.error) {
-        return new Response(JSON.stringify({
-            competitor_summary: `API Error: ${data.error.message}. Model attempted: ${finalModel}`,
-            money_list_keywords: ["API Error"],
-            content_gap_keywords: [],
-            recommendations: [],
-            article_ideas: []
-        }), { headers: { 'Content-Type': 'application/json' } });
+            const data = await geminiResponse.json();
+
+            if (data.error) throw new Error(data.error.message);
+
+            const aiText = data.candidates[0].content.parts[0].text;
+            const cleanJson = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
+
+            return new Response(cleanJson, { headers: { 'Content-Type': 'application/json' } });
+
+        } catch (e) {
+            lastError = e.message;
+            // Nadaljuj na naslednji model
+        }
     }
 
-    const aiText = data.candidates[0].content.parts[0].text;
-    const cleanJson = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
-
-    return new Response(cleanJson, { headers: { 'Content-Type': 'application/json' } });
+    throw new Error(`Google API Failed: ${lastError}`);
 
   } catch (error) {
     return new Response(JSON.stringify({
