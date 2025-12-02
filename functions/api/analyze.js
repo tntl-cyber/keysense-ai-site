@@ -9,25 +9,14 @@ export async function onRequest(context) {
   const GEMINI_KEY = "AIzaSyBGtyvrhLuMxerRVdLUmljnWU7mB-POjtc";
   const SERPER_KEY = "5ddb9fe661387ffb18f471615704b32ddbec0b13";
 
-  // SEZNAM MODELOV (Če prvi ne dela, poskusi naslednjega)
-  const candidateModels = [
-    "gemini-1.5-flash",
-    "gemini-1.5-flash-001",
-    "gemini-1.5-flash-latest",
-    "gemini-1.5-pro",
-    "gemini-pro"
-  ];
-
   try {
-    // 1. SCRARE CONTENT (Jina + Serper Fallback)
+    // 1. VSEBINA (Scraping)
     let contextText = "";
     let source = "Google Context";
-
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 6000); 
 
     try {
-      // Poskusimo Jina (Deep Scrape)
       const scrape = await fetch(`https://r.jina.ai/${targetUrl}`, {
         headers: { 
             'User-Agent': 'KeySense/1.0',
@@ -42,12 +31,11 @@ export async function onRequest(context) {
         source = "Full Website Content";
       }
     } catch (e) {
-      console.log("Jina fail, moving to Serper");
+      // Jina failed, ignore
     } finally {
       clearTimeout(timeoutId);
     }
 
-    // Če Jina ni delala, uporabimo Serper
     if (!contextText || contextText.length < 500) {
        const serper = await fetch('https://google.serper.dev/search', {
           method: 'POST',
@@ -60,67 +48,73 @@ export async function onRequest(context) {
        }
     }
 
-    // 2. OPAL PROMPT (Stisnjen za varno kopiranje)
-    const prompt = `Act as KeySense AI, an elite SEO strategist. Analyze this website content (${source}):
-    """${contextText}"""
+    // 2. OPAL PROMPT
+    const prompt = `
+      Act as KeySense AI, an elite SEO strategist.
+      Analyze this website content (${source}):
+      """${contextText}"""
+
+      Perform 3 tasks and combine into one JSON output.
+      
+      TASK 1: STRATEGY. Identify 'Money Topics', 'Content Gaps', and 5 'Money Keywords' (Transactional).
+      TASK 2: RECOMMENDATIONS. Create 3 specific optimization recommendations.
+      TASK 3: CONTENT PLAN. Suggest 3 blog article titles targeting gaps.
+
+      OUTPUT FORMAT (Strict JSON Only):
+      {
+        "competitor_summary": "Executive summary...",
+        "visible_keywords": [{"keyword": "Product Name", "intent": "Transactional", "opportunity": "High"}],
+        "content_gap_keywords": ["Gap Keyword 1", "Gap Keyword 2", "Gap Keyword 3"],
+        "money_list_keywords": ["Kw1", "Kw2", "Kw3", "Kw4", "Kw5"],
+        "hidden_keywords_count": 850,
+        "upgrade_hook": "Unlock full competitor data.",
+        "recommendations": [
+            {"title": "Fix 1", "desc": "How to fix..."},
+            {"title": "Fix 2", "desc": "How to fix..."},
+            {"title": "Fix 3", "desc": "How to fix..."}
+        ],
+        "article_ideas": [
+            {"title": "Article 1", "outline": "Focus on..."},
+            {"title": "Article 2", "outline": "Focus on..."},
+            {"title": "Article 3", "outline": "Focus on..."}
+        ]
+      }
+    `;
+
+    // 3. KLIC API - SPREMEMBA NA v1 (STABILNO)
+    // Uporabljamo 'v1' namesto 'v1beta'.
+    // Model 'gemini-1.5-flash' je tukaj standard.
     
-    Perform 3 tasks and combine into one JSON output.
-    TASK 1: STRATEGY. Identify 'Money Topics', 'Content Gaps', and 5 'Money Keywords' (Transactional).
-    TASK 2: RECOMMENDATIONS. Create 3 specific optimization recommendations.
-    TASK 3: CONTENT PLAN. Suggest 3 blog article titles targeting gaps.
+    const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`;
 
-    OUTPUT FORMAT (Strict JSON Only):
-    {
-      "competitor_summary": "Executive summary...",
-      "visible_keywords": [{"keyword": "Product Name", "intent": "Transactional", "opportunity": "High"}],
-      "content_gap_keywords": ["Gap Keyword 1", "Gap Keyword 2", "Gap Keyword 3"],
-      "money_list_keywords": ["Kw1", "Kw2", "Kw3", "Kw4", "Kw5"],
-      "hidden_keywords_count": 850,
-      "upgrade_hook": "Unlock full competitor data.",
-      "recommendations": [
-          {"title": "Fix 1", "desc": "How to fix..."},
-          {"title": "Fix 2", "desc": "How to fix..."},
-          {"title": "Fix 3", "desc": "How to fix..."}
-      ],
-      "article_ideas": [
-          {"title": "Article 1", "outline": "Focus on..."},
-          {"title": "Article 2", "outline": "Focus on..."},
-          {"title": "Article 3", "outline": "Focus on..."}
-      ]
-    }`;
+    const geminiResponse = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
 
-    // 3. MODEL HUNTER LOOP (Ključna rešitev za tvojo napako)
-    let lastError = "";
-    
-    for (const model of candidateModels) {
-        try {
-            const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_KEY}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-            });
+    const data = await geminiResponse.json();
 
-            const data = await geminiResponse.json();
-
-            if (data.error) throw new Error(data.error.message);
-
-            const aiText = data.candidates[0].content.parts[0].text;
-            const cleanJson = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
-
-            return new Response(cleanJson, { headers: { 'Content-Type': 'application/json' } });
-
-        } catch (e) {
-            console.log(`Model ${model} failed. Trying next...`);
-            lastError = e.message;
-        }
+    // DIAGNOSTIKA: Če še vedno ne dela, morava videti točen seznam modelov
+    if (data.error) {
+        return new Response(JSON.stringify({
+            competitor_summary: `FATAL ERROR: ${data.error.message}. Please check if 'Generative Language API' is enabled in Google Cloud Console.`,
+            money_list_keywords: ["API Error"],
+            content_gap_keywords: [],
+            recommendations: [],
+            article_ideas: []
+        }), { headers: { 'Content-Type': 'application/json' } });
     }
 
-    throw new Error(`All Google models failed. Last error: ${lastError}`);
+    const aiText = data.candidates[0].content.parts[0].text;
+    const cleanJson = aiText.replace(/```json/g, '').replace(/```/g, '').trim();
+
+    return new Response(cleanJson, { headers: { 'Content-Type': 'application/json' } });
 
   } catch (error) {
     return new Response(JSON.stringify({
         competitor_summary: `System Error: ${error.message}`,
-        money_list_keywords: ["API Error"],
+        money_list_keywords: ["System Error"],
         content_gap_keywords: [],
         recommendations: [],
         article_ideas: []
