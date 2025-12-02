@@ -10,100 +10,77 @@
             --bg-body: #F3F4F6;
             --bg-card: #FFFFFF;
             --primary: #4F46E5;
-            --primary-dark: #3730A3;
             --text-main: #111827;
             --text-sub: #6B7280;
             --semrush-orange: #FF642D;
             --success: #10B981;
+            --danger: #EF4444;
         }
-        body { font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding: 0; }
         
-        /* LAYOUT & HERO */
         .main-wrapper { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
         .hero { text-align: center; margin-bottom: 50px; }
         .hero h1 { font-size: 3rem; font-weight: 800; margin-bottom: 15px; color: var(--text-main); letter-spacing: -1px; }
-        .hero p { color: var(--text-sub); font-size: 1.25rem; max-width: 600px; margin: 0 auto; line-height: 1.5; }
+        .hero p { color: var(--text-sub); font-size: 1.25rem; max-width: 600px; margin: 0 auto; }
 
-        /* INPUT AREA */
-        .search-container { max-width: 700px; margin: 40px auto 60px; position: relative; z-index: 10; }
+        /* SEARCH */
+        .search-container { max-width: 700px; margin: 40px auto 60px; }
         .input-box { display: flex; gap: 10px; background: white; padding: 8px; border-radius: 12px; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); border: 1px solid #E5E7EB; }
-        .input-box input { flex: 1; padding: 16px; border: none; font-size: 1.1rem; outline: none; border-radius: 8px; }
-        .btn-analyze { background: var(--text-main); color: white; border: none; padding: 16px 32px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1rem; transition: all 0.2s; white-space: nowrap; }
-        .btn-analyze:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .input-box input { flex: 1; padding: 16px; border: none; font-size: 1.1rem; outline: none; }
+        .btn-analyze { background: var(--text-main); color: white; border: none; padding: 16px 32px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.2s; }
+        .btn-analyze:hover { transform: scale(1.02); }
 
-        /* LOADING */
+        /* LOADER */
         .loader { display: none; text-align: center; margin: 80px 0; }
         .spinner { width: 60px; height: 60px; border: 6px solid #E5E7EB; border-top: 6px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* REPORT GRID */
+        /* GRID */
         .report-grid { display: none; grid-template-columns: 2.2fr 1fr; gap: 30px; opacity: 0; transition: opacity 0.6s ease-out; }
         .col-main { display: flex; flex-direction: column; gap: 30px; }
         .col-side { display: flex; flex-direction: column; gap: 30px; }
 
         /* CARDS */
         .card { background: var(--bg-card); border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #E5E7EB; overflow: hidden; position: relative; }
-        .card-header { padding: 25px; border-bottom: 1px solid #F3F4F6; display: flex; align-items: center; justify-content: space-between; background: #fff; }
-        .card-title { font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .card-header { padding: 20px 25px; border-bottom: 1px solid #F3F4F6; display: flex; align-items: center; justify-content: space-between; background: #fff; }
+        .card-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
         .icon { width: 24px; height: 24px; color: var(--primary); }
 
-        /* KEYWORD TABLE (The Money Maker) */
+        /* MONEY KEYWORDS TABLE */
         .kw-table { width: 100%; border-collapse: collapse; }
         .kw-table th { text-align: left; padding: 12px 25px; color: var(--text-sub); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #F3F4F6; }
-        .kw-table td { padding: 16px 25px; border-bottom: 1px solid #F9FAFB; font-size: 0.95rem; vertical-align: middle; }
-        .kw-text { font-weight: 600; color: var(--text-main); }
-        .kw-intent { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; background: #EEF2FF; color: var(--primary); }
-        .kw-vol { font-family: monospace; color: var(--text-sub); }
-        .kw-kd { display: inline-block; width: 30px; height: 8px; background: #E5E7EB; border-radius: 4px; position: relative; overflow: hidden; }
-        .kw-kd::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; background: var(--success); width: 40%; } /* Fake KD bar */
+        .kw-table td { padding: 16px 25px; border-bottom: 1px solid #F9FAFB; font-size: 0.95rem; font-weight: 600; }
+        .kw-intent { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; background: #EEF2FF; color: var(--primary); }
+        .kw-kd-bar { width: 30px; height: 6px; background: #E5E7EB; border-radius: 3px; position: relative; }
+        .kw-kd-bar::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; background: var(--success); width: 40%; }
 
-        /* BLURRED ROWS (Psychology) */
-        .blur-rows-container { position: relative; }
+        /* BLURRED ROWS */
         .fake-row { display: flex; padding: 16px 25px; border-bottom: 1px solid #F9FAFB; align-items: center; justify-content: space-between; filter: blur(5px); opacity: 0.5; user-select: none; }
         .fake-text { height: 14px; background: #E5E7EB; border-radius: 4px; width: 40%; }
-        .fake-metric { height: 14px; background: #E5E7EB; border-radius: 4px; width: 15%; }
-
-        /* LOCK OVERLAY */
-        .lock-overlay { 
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
-            background: linear-gradient(to bottom, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.9) 30%, #ffffff 100%);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 20; padding-top: 40px;
-        }
-        .lock-icon-large { width: 48px; height: 48px; color: var(--text-main); margin-bottom: 15px; opacity: 0.8; }
         
-        /* PULSING CTA BUTTON */
-        .btn-upgrade { 
-            background: var(--semrush-orange); color: white; text-decoration: none; 
-            padding: 18px 40px; border-radius: 50px; font-weight: 800; font-size: 1.1rem; 
-            box-shadow: 0 10px 30px rgba(255, 100, 45, 0.4); 
-            display: flex; align-items: center; gap: 10px;
-            animation: pulse 2s infinite;
-            transition: transform 0.2s;
-        }
+        /* LOCK OVERLAY (MAIN) */
+        .lock-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 200px; background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 40%); display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 30px; z-index: 20; }
+        
+        /* CTA BUTTONS */
+        .btn-upgrade { background: var(--semrush-orange); color: white; text-decoration: none; padding: 16px 32px; border-radius: 50px; font-weight: 800; font-size: 1rem; box-shadow: 0 10px 30px rgba(255, 100, 45, 0.4); display: flex; align-items: center; gap: 8px; transition: transform 0.2s; }
         .btn-upgrade:hover { transform: scale(1.05); }
-        
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 100, 45, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(255, 100, 45, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 100, 45, 0); }
-        }
+        .btn-small { padding: 10px 20px; font-size: 0.9rem; width: 100%; justify-content: center; box-sizing: border-box; margin-top: 10px; }
 
-        /* ARTICLE CARDS */
-        .article-card { padding: 20px 25px; border-bottom: 1px solid #F3F4F6; transition: background 0.2s; }
-        .article-card:hover { background: #F9FAFB; }
-        .art-tag { font-size: 0.75rem; text-transform: uppercase; color: var(--text-sub); font-weight: 700; margin-bottom: 5px; display: block; }
-        .art-title { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; }
-        .art-desc { font-size: 0.9rem; color: var(--text-sub); line-height: 1.5; }
+        /* GAPS SECTION (RED) */
+        .gap-container { padding: 25px; }
+        .gap-tag { display: inline-block; background: #FEF2F2; color: var(--danger); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; border: 1px solid #FEE2E2; margin: 0 5px 5px 0; }
+        .fake-gap-area { margin-top: 10px; filter: blur(4px); opacity: 0.5; user-select: none; }
+        .fake-gap { display: inline-block; background: #F3F4F6; height: 30px; width: 80px; border-radius: 6px; margin: 0 5px 5px 0; }
 
-        /* RECOMMENDATIONS */
-        .rec-item { display: flex; gap: 15px; padding: 20px; border-bottom: 1px solid #F3F4F6; }
-        .check-icon { color: var(--success); flex-shrink: 0; width: 20px; }
-        
-        /* SIDEBAR STATS */
+        /* ARTICLES SECTION */
+        .article-card { padding: 20px 25px; border-bottom: 1px solid #F3F4F6; }
+        .art-tag { font-size: 0.75rem; text-transform: uppercase; color: var(--text-sub); font-weight: 700; }
+        .art-title { font-weight: 700; color: var(--text-main); margin-top: 5px; }
+        .art-fake { filter: blur(4px); opacity: 0.4; }
+
+        /* STATS SIDEBAR */
         .stat-box { background: #1F2937; color: white; padding: 30px; border-radius: 16px; text-align: center; margin-bottom: 30px; }
         .stat-val { font-size: 4rem; font-weight: 800; line-height: 1; color: #34D399; margin: 10px 0; }
-        .stat-label { font-size: 1rem; opacity: 0.8; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
 
         @media (max-width: 800px) { .report-grid { grid-template-columns: 1fr; } }
     </style>
@@ -119,130 +96,105 @@
     <div class="search-container" id="searchArea">
         <div class="input-box">
             <input type="text" id="urlInput" placeholder="Enter competitor URL (e.g., nike.com)">
-            <button class="btn-analyze" onclick="startAnalysis()">
-                REVEAL DATA
-            </button>
+            <button class="btn-analyze" onclick="startAnalysis()">REVEAL DATA</button>
         </div>
-        <p style="text-align: center; margin-top: 15px; font-size: 0.85rem; color: #6B7280; display: flex; align-items: center; justify-content: center; gap: 6px;">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-            100% Secure & Private Analysis
-        </p>
     </div>
 
     <div class="loader" id="loader">
         <div class="spinner"></div>
-        <h3 style="font-size: 1.2rem; color: #111827;">Analiziram Strategijo...</h3>
-        <p style="color: #6B7280;">Primerjam ključne besede in iščem priložnosti.</p>
+        <h3>Analyzing Strategy...</h3>
     </div>
 
     <div class="report-grid" id="report">
         
-        <!-- MAIN CONTENT -->
+        <!-- MAIN COL -->
         <div class="col-main">
-            
-            <!-- SUMMARY CARD -->
+            <!-- SUMMARY -->
             <div class="card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
-                        Strategic Executive Summary
-                    </div>
-                </div>
+                <div class="card-header"><div class="card-title">Strategic Executive Summary</div></div>
                 <div style="padding: 25px; line-height: 1.7; color: #374151;" id="summaryText"></div>
             </div>
 
-            <!-- MONEY KEYWORDS TABLE (THE GOLD MINE) -->
+            <!-- MONEY KEYWORDS -->
             <div class="card" style="padding: 0;">
                 <div class="card-header">
-                    <div class="card-title">
-                        <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        Top Performing Keywords (High Intent)
-                    </div>
-                    <span style="font-size: 0.85rem; color: var(--success); font-weight: 600;">Live Data</span>
+                    <div class="card-title">Top Performing Keywords (High Intent)</div>
+                    <span style="font-size:0.85rem; color:#10B981; font-weight:600;">Live Data</span>
                 </div>
+                <table class="kw-table"><tbody id="moneyTableBody"></tbody></table>
                 
-                <table class="kw-table">
-                    <thead>
-                        <tr>
-                            <th>Keyword</th>
-                            <th>Intent</th>
-                            <th>Difficulty</th>
-                        </tr>
-                    </thead>
-                    <tbody id="moneyTableBody">
-                        <!-- JS Fills this -->
-                    </tbody>
-                </table>
-
-                <!-- FAKE BLURRED DATA (PSYCHOLOGY) -->
-                <div class="blur-rows-container">
-                    <div id="fakeRows"></div> <!-- JS fills 15 rows -->
-                    
+                <!-- BLURRED ROWS & CTA -->
+                <div style="position:relative;">
+                    <div id="fakeRows"></div>
                     <div class="lock-overlay">
-                        <svg class="lock-icon-large" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                        <h3 style="font-size: 1.5rem; margin: 0 0 10px 0; color: #111827;">+ 1,240 Hidden Keywords</h3>
-                        <p style="color: #4B5563; margin-bottom: 25px; max-width: 400px; text-align: center;">Unlock Search Volume, CPC, and Difficulty metrics for the entire competitor strategy.</p>
-                        
-                        <!-- AFFILIATE LINK -->
-                        <a href="https://www.semrush.com/" class="btn-upgrade" target="_blank">
-                            UNLOCK FULL REPORT
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                        </a>
-                        <p style="margin-top: 15px; font-size: 0.8rem; color: #9CA3AF;">7-Day Free Trial • Cancel Anytime</p>
+                        <h3 style="font-size:1.5rem; margin-bottom:10px;">+ <span id="lockCount">1,200</span> Hidden Keywords</h3>
+                        <p style="color:#4B5563; margin-bottom:20px;">Unlock full volume & difficulty data.</p>
+                        <a href="YOUR_SEMRUSH_AFFILIATE_LINK" class="btn-upgrade" target="_blank">UNLOCK FULL REPORT</a>
                     </div>
                 </div>
             </div>
 
-            <!-- CONTENT PLAN -->
+            <!-- ARTICLES -->
             <div class="card" style="padding: 0;">
-                <div class="card-header">
-                    <div class="card-title">
-                        <svg class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" /></svg>
-                        Content Strategy Plan
-                    </div>
-                </div>
+                <div class="card-header"><div class="card-title">Content Strategy Plan</div></div>
                 <div id="articlesList"></div>
-                <!-- Fake Locked Article -->
-                <div class="article-card" style="filter: blur(4px); opacity: 0.5;">
-                    <span class="art-tag">PREMIUM GUIDE</span>
-                    <div class="art-title">How to dominate [Niche] in 30 days</div>
-                    <div class="art-desc">Comprehensive guide on backlinks and internal linking strategy...</div>
+                <!-- Fake Blurred Article -->
+                <div class="article-card art-fake">
+                    <span class="art-tag">Premium Guide</span>
+                    <div class="art-title">How to dominate this niche in 30 days</div>
+                    <div>Lorem ipsum dolor sit amet content strategy...</div>
+                </div>
+                <div style="padding: 20px; background: #F9FAFB; text-align: center;">
+                    <a href="YOUR_SEMRUSH_AFFILIATE_LINK" class="btn-upgrade btn-small" target="_blank">Access Full Content Plan</a>
                 </div>
             </div>
-
         </div>
 
         <!-- SIDEBAR -->
         <div class="col-side">
-            <!-- STATS -->
+            <!-- STATS (ANIMATED) -->
             <div class="stat-box">
-                <div class="stat-label">Total Opportunity</div>
-                <div class="stat-val" id="hiddenCount">500+</div>
-                <div style="font-size: 0.9rem; opacity: 0.7; margin-bottom: 20px;">Untapped Keywords</div>
-                <a href="https://www.semrush.com/" target="_blank" style="color: #34D399; text-decoration: none; font-weight: 700; font-size: 0.9rem; border-bottom: 1px dotted #34D399;">View Opportunity Map &rarr;</a>
+                <div style="font-size:0.9rem; opacity:0.8; text-transform:uppercase;">Total Opportunity</div>
+                <div class="stat-val" id="hiddenCount">0</div>
+                <div style="font-size:0.9rem; opacity:0.7;">Untapped Keywords</div>
             </div>
 
-            <!-- RECOMMENDATIONS -->
+            <!-- GAPS (WITH BLUR & CTA) -->
             <div class="card" style="padding: 0;">
-                <div class="card-header">
-                    <div class="card-title">Top Recommendations</div>
+                <div class="card-header"><div class="card-title" style="color:#DC2626;">⚠️ Critical Content Gaps</div></div>
+                <div class="gap-container">
+                    <div id="gapList"></div>
+                    <!-- FAKE BLURRED GAPS -->
+                    <div class="fake-gap-area" id="fakeGaps"></div>
+                    
+                    <a href="YOUR_SEMRUSH_AFFILIATE_LINK" class="btn-upgrade btn-small" style="background:#DC2626; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);" target="_blank">
+                        Reveal All Missing Gaps
+                    </a>
                 </div>
-                <div id="recList"></div>
             </div>
 
-            <!-- GAPS -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title" style="font-size: 1rem;">🔥 Missing Content Gaps</div>
-                </div>
-                <div style="display: flex; flex-wrap: wrap; gap: 8px;" id="gapList"></div>
-            </div>
+            <!-- RECCOMENDATIONS -->
+            <div class="card"><div class="card-header"><div class="card-title">Top Recommendations</div></div><div id="recList" style="padding: 0 20px 20px;"></div></div>
         </div>
 
     </div>
 </div>
 
 <script>
+    // Animation Function
+    function animateValue(obj, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            obj.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString();
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+
     async function startAnalysis() {
         const url = document.getElementById('urlInput').value;
         if (!url || url.length < 4) return alert("Enter URL");
@@ -250,17 +202,14 @@
         document.getElementById('searchArea').style.display = 'none';
         document.getElementById('loader').style.display = 'block';
 
-        // Generate Fake Blurred Rows immediately for visual effect
-        const fakeContainer = document.getElementById('fakeRows');
-        fakeContainer.innerHTML = '';
-        for(let i=0; i<12; i++) {
-            fakeContainer.innerHTML += `
-                <div class="fake-row">
-                    <div class="fake-text" style="width: ${Math.random() * (60 - 30) + 30}%"></div>
-                    <div class="fake-metric"></div>
-                    <div class="fake-metric" style="width: 10%"></div>
-                </div>`;
-        }
+        // Generate Fake Visuals
+        const fakeRows = document.getElementById('fakeRows');
+        fakeRows.innerHTML = '';
+        for(let i=0; i<10; i++) fakeRows.innerHTML += `<div class="fake-row"><div class="fake-text" style="width:${Math.random()*40+20}%"></div><div class="fake-text" style="width:10%"></div></div>`;
+        
+        const fakeGaps = document.getElementById('fakeGaps');
+        fakeGaps.innerHTML = '';
+        for(let i=0; i<8; i++) fakeGaps.innerHTML += `<div class="fake-gap" style="width:${Math.random()*60+40}px"></div>`;
 
         try {
             const res = await fetch(`/api/analyze?url=${encodeURIComponent(url)}`);
@@ -269,68 +218,45 @@
             // 1. Summary
             document.getElementById('summaryText').innerText = data.competitor_summary;
             
-            // 2. Money Keywords Table (Real Data)
+            // 2. Animated Stats (The Wow Factor)
+            const countEl = document.getElementById('hiddenCount');
+            const targetCount = data.hidden_keywords_count || 1250;
+            animateValue(countEl, 0, targetCount, 2000); // 2 second animation
+            document.getElementById('lockCount').innerText = targetCount.toLocaleString();
+
+            // 3. Money Keywords
             const tableBody = document.getElementById('moneyTableBody');
             tableBody.innerHTML = '';
             if(data.money_list_keywords) {
                 data.money_list_keywords.forEach(kw => {
-                    // Generiramo fake KD za realizem, ker AI tega ne da
-                    const randomVol = Math.floor(Math.random() * (12000 - 1000) + 1000).toLocaleString();
-                    tableBody.innerHTML += `
-                        <tr>
-                            <td><div class="kw-text">${kw}</div></td>
-                            <td><span class="kw-intent">Commercial</span></td>
-                            <td>
-                                <div style="display:flex; align-items:center; gap:8px;">
-                                    <div class="kw-kd" style="width: 40px;"><div style="background:#10B981; width:${Math.random() * 100}%; height:100%;"></div></div>
-                                </div>
-                            </td>
-                        </tr>
-                    `;
+                    tableBody.innerHTML += `<tr><td>${kw}</td><td><span class="kw-intent">Commercial</span></td><td><div class="kw-kd-bar"><div style="width:${Math.random()*100}%"></div></div></td></tr>`;
                 });
             }
-
-            // 3. Stats
-            document.getElementById('hiddenCount').innerText = (data.hidden_keywords_count || 1240).toLocaleString();
 
             // 4. Articles
             const artBox = document.getElementById('articlesList');
             artBox.innerHTML = '';
             if(data.article_ideas) {
                 data.article_ideas.forEach(art => {
-                    artBox.innerHTML += `
-                        <div class="article-card">
-                            <span class="art-tag">Blog Strategy</span>
-                            <div class="art-title">${art.title}</div>
-                            <div class="art-desc">${art.outline}</div>
-                        </div>
-                    `;
+                    artBox.innerHTML += `<div class="article-card"><span class="art-tag">Strategy</span><div class="art-title">${art.title}</div><div style="font-size:0.9rem; color:#6B7280;">${art.outline}</div></div>`;
                 });
             }
 
-            // 5. Recommendations
-            const recBox = document.getElementById('recList');
-            recBox.innerHTML = '';
-            if(data.recommendations) {
-                data.recommendations.forEach(rec => {
-                    recBox.innerHTML += `
-                        <div class="rec-item">
-                            <svg class="check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg>
-                            <div>
-                                <div style="font-weight: 700; margin-bottom: 3px; font-size: 0.95rem;">${rec.title}</div>
-                                <div style="font-size: 0.85rem; color: #6B7280; line-height: 1.4;">${rec.desc}</div>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-
-            // 6. Gaps
+            // 5. Gaps
             const gapBox = document.getElementById('gapList');
             gapBox.innerHTML = '';
             if(data.content_gap_keywords) {
                 data.content_gap_keywords.forEach(kw => {
-                    gapBox.innerHTML += `<div style="background:#FEF2F2; color:#DC2626; padding:6px 12px; border-radius:6px; font-size:0.85rem; font-weight:600; border:1px solid #FEE2E2;">${kw}</div>`;
+                    gapBox.innerHTML += `<div class="gap-tag">⚠️ ${kw}</div>`;
+                });
+            }
+
+            // 6. Recs
+            const recBox = document.getElementById('recList');
+            recBox.innerHTML = '';
+            if(data.recommendations) {
+                data.recommendations.forEach(rec => {
+                    recBox.innerHTML += `<div style="margin-top:15px; border-bottom:1px solid #f3f4f6; padding-bottom:10px;"><div style="font-weight:700; font-size:0.95rem;">✅ ${rec.title}</div><div style="font-size:0.85rem; color:#6B7280;">${rec.desc}</div></div>`;
                 });
             }
 
