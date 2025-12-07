@@ -6,12 +6,20 @@
     <!-- SEO META -->
     <title>KeySense AI - Reveal Competitor Money Keywords</title>
     <meta name="description" content="Free AI tool to reverse-engineer competitor SEO strategy. Find hidden money keywords and content gaps in seconds.">
+    
+    <!-- FAVICON -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+
+    <!-- FONTS -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --bg-body: #F9FAFB;
             --bg-card: #FFFFFF;
             --primary: #4F46E5;
+            --primary-dark: #3730A3;
             --text-main: #111827;
             --text-sub: #6B7280;
             --semrush-orange: #FF642D;
@@ -21,8 +29,16 @@
         body { font-family: 'Inter', sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
         
         .main-wrapper { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+        
+        /* HERO & LOGO */
         .hero { text-align: center; margin-bottom: 40px; }
-        .hero h1 { font-size: 3.2rem; font-weight: 800; margin-bottom: 15px; color: var(--text-main); letter-spacing: -1.5px; line-height: 1.1; }
+        .logo-img {
+            max-width: 450px; /* Prilagodi velikost logotipa */
+            width: 100%;
+            height: auto;
+            margin: 0 auto 20px auto;
+            display: block;
+        }
         .hero p { color: var(--text-sub); font-size: 1.2rem; max-width: 600px; margin: 0 auto; }
 
         /* SEARCH AREA WITH TRUST */
@@ -50,14 +66,17 @@
         .card-header { padding: 20px 25px; border-bottom: 1px solid #F3F4F6; display: flex; align-items: center; justify-content: space-between; background: #fff; }
         .card-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
         
-        /* MONEY METRIC (New!) */
+        /* MONEY METRIC */
         .money-metric { color: var(--success); background: #ECFDF5; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
 
         /* TABLE */
         .kw-table { width: 100%; border-collapse: collapse; }
         .kw-table th { text-align: left; padding: 12px 25px; color: var(--text-sub); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #F3F4F6; }
         .kw-table td { padding: 16px 25px; border-bottom: 1px solid #F9FAFB; font-size: 0.95rem; font-weight: 600; vertical-align: middle; }
-        
+        .kw-intent { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; background: #EEF2FF; color: var(--primary); }
+        .kw-kd-bar { width: 30px; height: 6px; background: #E5E7EB; border-radius: 3px; position: relative; }
+        .kw-kd-bar::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; background: var(--success); width: 40%; }
+
         /* BLURRED ROWS */
         .fake-row { display: flex; padding: 16px 25px; border-bottom: 1px solid #F9FAFB; align-items: center; justify-content: space-between; filter: blur(5px); opacity: 0.6; user-select: none; }
         .fake-text { height: 14px; background: #E5E7EB; border-radius: 4px; width: 40%; }
@@ -84,20 +103,38 @@
         .value-card { background: #EEF2FF; border: 1px solid #C7D2FE; color: #312E81; padding: 20px; border-radius: 12px; margin-bottom: 30px; text-align: center; }
         .value-amount { font-size: 2rem; font-weight: 800; color: var(--primary); display: block; margin: 5px 0; }
 
+        /* GAPS SECTION (RED) */
+        .gap-tag { display: inline-block; background: #FEF2F2; color: var(--danger); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; border: 1px solid #FEE2E2; margin: 0 5px 5px 0; }
+        .fake-gap-area { margin-top: 10px; filter: blur(4px); opacity: 0.5; user-select: none; }
+        .fake-gap { display: inline-block; background: #F3F4F6; height: 30px; width: 80px; border-radius: 6px; margin: 0 5px 5px 0; }
+
+        /* ARTICLES SECTION */
+        .article-card { padding: 20px 25px; border-bottom: 1px solid #F3F4F6; transition: background 0.2s; }
+        .article-card:hover { background: #F9FAFB; }
+        .art-tag { font-size: 0.75rem; text-transform: uppercase; color: var(--text-sub); font-weight: 700; margin-bottom: 5px; display: block; }
+        .art-title { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; }
+        .art-desc { font-size: 0.9rem; color: var(--text-sub); line-height: 1.5; }
+        .art-fake { filter: blur(4px); opacity: 0.4; }
+
+        /* RECCOMENDATIONS */
+        .rec-item { display: flex; gap: 15px; padding: 20px; border-bottom: 1px solid #F3F4F6; }
+        .check-icon { color: var(--success); flex-shrink: 0; width: 20px; }
+
         /* EXIT INTENT MODAL */
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
         .modal-content { background-color: #fefefe; margin: 15% auto; padding: 40px; border-radius: 20px; max-width: 500px; text-align: center; position: relative; animation: slideDown 0.4s; }
         @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; position: absolute; right: 20px; top: 10px; }
 
-        @media (max-width: 800px) { .report-grid { grid-template-columns: 1fr; } .hero h1 { font-size: 2.2rem; } }
+        @media (max-width: 800px) { .report-grid { grid-template-columns: 1fr; } .hero h1 { font-size: 2.2rem; } .logo-img { max-width: 300px; } }
     </style>
 </head>
 <body>
 
 <div class="main-wrapper">
     <div class="hero">
-        <h1>Steal Your Competitor's <span style="color: #4F46E5;">Traffic</span></h1>
+        <!-- LOGO -->
+        <img src="/images/logo.png" alt="KeySense AI Logo" class="logo-img">
         <p>Enter any domain. Our AI reveals their most profitable keywords and content gaps.</p>
     </div>
 
@@ -156,9 +193,11 @@
                 <div style="position:relative;">
                     <div id="fakeRows"></div>
                     <div class="lock-overlay">
-                        <h3 style="font-size:1.5rem; margin-bottom:10px;">+ <span id="lockCount">1,200</span> Hidden Keywords</h3>
-                        <p style="color:#4B5563; margin-bottom:25px;">Unlock search volume, difficulty, and cost-per-click data.</p>
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2" style="margin-bottom:15px; opacity:0.8;"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <h3 style="font-size:1.5rem; margin: 0 0 10px 0; color:#111827;">+ <span id="lockCount">1,200</span> Hidden Keywords</h3>
+                        <p style="color:#4B5563; margin-bottom:25px; max-width:400px; text-align:center;">Unlock search volume, difficulty, and cost-per-click data.</p>
                         <a href="YOUR_SEMRUSH_AFFILIATE_LINK" class="btn-upgrade" target="_blank">UNLOCK FULL REVENUE DATA</a>
+                        <p style="margin-top: 15px; font-size: 0.8rem; color: #9CA3AF;">7-Day Free Trial • Cancel Anytime</p>
                     </div>
                 </div>
             </div>
@@ -167,6 +206,12 @@
             <div class="card" style="padding: 0;">
                 <div class="card-header"><div class="card-title">Content Strategy Plan</div></div>
                 <div id="articlesList"></div>
+                <!-- Fake Locked Article -->
+                <div class="article-card art-fake">
+                    <span class="art-tag">Premium Guide</span>
+                    <div class="art-title">How to dominate this niche in 30 days</div>
+                    <div class="art-desc">Comprehensive guide on backlinks and internal linking strategy...</div>
+                </div>
                 <div style="padding: 20px; background: #F9FAFB; text-align: center;">
                     <a href="YOUR_SEMRUSH_AFFILIATE_LINK" class="btn-upgrade" style="font-size:0.9rem; padding:12px 24px; width:auto; display:inline-flex;" target="_blank">Access Full Content Plan</a>
                 </div>
@@ -175,7 +220,7 @@
 
         <!-- SIDEBAR -->
         <div class="col-side">
-            <!-- FINANCIAL PAIN (NEW!) -->
+            <!-- FINANCIAL PAIN -->
             <div class="value-card">
                 <div style="font-size:0.85rem; font-weight:600; letter-spacing:1px; text-transform:uppercase;">Estimated Missed Value</div>
                 <span class="value-amount" id="moneyValue">$0</span>
@@ -190,10 +235,13 @@
             </div>
 
             <!-- GAPS -->
-            <div class="card">
+            <div class="card" style="padding: 0;">
                 <div class="card-header"><div class="card-title" style="color:#DC2626;">⚠️ Critical Content Gaps</div></div>
                 <div style="padding: 20px;">
                     <div id="gapList" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                    <!-- FAKE BLURRED GAPS -->
+                    <div class="fake-gap-area" id="fakeGaps"></div>
+                    
                     <div style="margin-top:20px; text-align:center;">
                         <a href="YOUR_SEMRUSH_AFFILIATE_LINK" style="color:#DC2626; font-weight:700; text-decoration:none; border-bottom:1px dotted #DC2626;" target="_blank">See all missing topics &rarr;</a>
                     </div>
@@ -252,10 +300,14 @@
         document.getElementById('trustBadges').style.display = 'none';
         document.getElementById('loader').style.display = 'block';
 
-        // Fake rows
+        // Fake rows generation
         const fakeRows = document.getElementById('fakeRows');
         fakeRows.innerHTML = '';
-        for(let i=0; i<10; i++) fakeRows.innerHTML += `<div class="fake-row"><div class="fake-text" style="width:${Math.random()*40+20}%"></div><div class="fake-text" style="width:10%"></div></div>`;
+        for(let i=0; i<10; i++) fakeRows.innerHTML += `<div class="fake-row"><div class="fake-text" style="width:${Math.random()*40+20}%"></div><div class="fake-text" style="width:10%"></div><div class="fake-text" style="width:10%"></div></div>`;
+        
+        const fakeGaps = document.getElementById('fakeGaps');
+        fakeGaps.innerHTML = '';
+        for(let i=0; i<8; i++) fakeGaps.innerHTML += `<div class="fake-gap" style="width:${Math.random()*60+40}px"></div>`;
 
         try {
             const res = await fetch(`/api/analyze?url=${encodeURIComponent(url)}`);
@@ -263,9 +315,8 @@
 
             document.getElementById('summaryText').innerText = data.competitor_summary;
             
-            // ANIMATED STATS & MONEY (Psychology)
+            // ANIMATED STATS & MONEY
             const targetCount = data.hidden_keywords_count || 1250;
-            // Recimo da je vsak keyword vreden $1.5
             const moneyVal = Math.floor(targetCount * 1.5);
             
             animateValue(document.getElementById('hiddenCount'), 0, targetCount, 2000);
@@ -279,7 +330,7 @@
             if(data.money_list_keywords) {
                 data.money_list_keywords.forEach(kw => {
                     const vol = Math.floor(Math.random() * (20000 - 500) + 500).toLocaleString();
-                    tableBody.innerHTML += `<tr><td style="font-weight:600; color:#374151;">${kw}</td><td><span class="kw-intent">Transactional</span></td><td style="font-family:monospace; color:#6B7280;">${vol}</td></tr>`;
+                    tableBody.innerHTML += `<tr><td><div style="font-weight:600; color:#374151;">${kw}</div></td><td><span class="kw-intent">Transactional</span></td><td style="font-family:monospace; color:#6B7280;">${vol}</td></tr>`;
                 });
             }
 
@@ -287,7 +338,7 @@
             artBox.innerHTML = '';
             if(data.article_ideas) {
                 data.article_ideas.forEach(art => {
-                    artBox.innerHTML += `<div class="article-card"><span class="art-tag">Topic Cluster</span><div class="art-title">${art.title}</div><div style="font-size:0.9rem; color:#6B7280;">${art.outline}</div></div>`;
+                    artBox.innerHTML += `<div class="article-card"><span class="art-tag">Topic Cluster</span><div class="art-title">${art.title}</div><div class="art-desc">${art.outline}</div></div>`;
                 });
             }
 
@@ -295,7 +346,7 @@
             gapBox.innerHTML = '';
             if(data.content_gap_keywords) {
                 data.content_gap_keywords.forEach(kw => {
-                    gapBox.innerHTML += `<div style="background:#FEF2F2; color:#DC2626; padding:6px 12px; border-radius:6px; font-size:0.85rem; font-weight:600; border:1px solid #FEE2E2;">${kw}</div>`;
+                    gapBox.innerHTML += `<div class="gap-tag">⚠️ ${kw}</div>`;
                 });
             }
 
@@ -303,7 +354,7 @@
             recBox.innerHTML = '';
             if(data.recommendations) {
                 data.recommendations.forEach(rec => {
-                    recBox.innerHTML += `<div style="margin-top:15px; border-bottom:1px solid #f3f4f6; padding-bottom:10px;"><div style="font-weight:700; font-size:0.95rem;">${rec.title}</div><div style="font-size:0.85rem; color:#6B7280;">${rec.desc}</div></div>`;
+                    recBox.innerHTML += `<div class="rec-item"><svg class="check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg><div><div style="font-weight:700; font-size:0.95rem;">${rec.title}</div><div style="font-size:0.85rem; color:#6B7280;">${rec.desc}</div></div></div>`;
                 });
             }
 
