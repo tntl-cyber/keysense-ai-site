@@ -32,8 +32,9 @@
         
         /* HERO & LOGO */
         .hero { text-align: center; margin-bottom: 40px; }
+        /* POPRAVLJENA POT DO SLIKE */
         .logo-img {
-            max-width: 450px; /* Prilagodi velikost logotipa */
+            max-width: 450px; 
             width: 100%;
             height: auto;
             margin: 0 auto 20px auto;
@@ -41,7 +42,7 @@
         }
         .hero p { color: var(--text-sub); font-size: 1.2rem; max-width: 600px; margin: 0 auto; }
 
-        /* SEARCH AREA WITH TRUST */
+        /* SEARCH AREA */
         .search-container { max-width: 700px; margin: 40px auto 30px; position: relative; z-index: 10; }
         .input-box { display: flex; gap: 10px; background: white; padding: 10px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15); border: 1px solid #E5E7EB; }
         .input-box input { flex: 1; padding: 16px; border: none; font-size: 1.1rem; outline: none; border-radius: 8px; }
@@ -66,7 +67,6 @@
         .card-header { padding: 20px 25px; border-bottom: 1px solid #F3F4F6; display: flex; align-items: center; justify-content: space-between; background: #fff; }
         .card-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
         
-        /* MONEY METRIC */
         .money-metric { color: var(--success); background: #ECFDF5; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
 
         /* TABLE */
@@ -94,16 +94,15 @@
         .btn-upgrade:hover { transform: scale(1.05); }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 100, 45, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(255, 100, 45, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 100, 45, 0); } }
 
-        /* STATS SIDEBAR */
+        /* SIDEBAR STATS */
         .stat-box { background: #1F2937; color: white; padding: 30px; border-radius: 16px; text-align: center; margin-bottom: 30px; }
         .stat-val { font-size: 3.5rem; font-weight: 800; line-height: 1; color: #34D399; margin: 10px 0; }
         .stat-sub { color: #9CA3AF; font-size: 0.9rem; margin-top: 5px; }
         
-        /* VALUE CARD (Financial Pain) */
         .value-card { background: #EEF2FF; border: 1px solid #C7D2FE; color: #312E81; padding: 20px; border-radius: 12px; margin-bottom: 30px; text-align: center; }
         .value-amount { font-size: 2rem; font-weight: 800; color: var(--primary); display: block; margin: 5px 0; }
 
-        /* GAPS SECTION (RED) */
+        /* GAPS SECTION */
         .gap-tag { display: inline-block; background: #FEF2F2; color: var(--danger); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; border: 1px solid #FEE2E2; margin: 0 5px 5px 0; }
         .fake-gap-area { margin-top: 10px; filter: blur(4px); opacity: 0.5; user-select: none; }
         .fake-gap { display: inline-block; background: #F3F4F6; height: 30px; width: 80px; border-radius: 6px; margin: 0 5px 5px 0; }
@@ -112,15 +111,15 @@
         .article-card { padding: 20px 25px; border-bottom: 1px solid #F3F4F6; transition: background 0.2s; }
         .article-card:hover { background: #F9FAFB; }
         .art-tag { font-size: 0.75rem; text-transform: uppercase; color: var(--text-sub); font-weight: 700; margin-bottom: 5px; display: block; }
-        .art-title { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 5px; }
+        .art-title { font-weight: 700; color: var(--text-main); margin-bottom: 5px; }
         .art-desc { font-size: 0.9rem; color: var(--text-sub); line-height: 1.5; }
         .art-fake { filter: blur(4px); opacity: 0.4; }
 
-        /* RECCOMENDATIONS */
+        /* RECOMMENDATIONS */
         .rec-item { display: flex; gap: 15px; padding: 20px; border-bottom: 1px solid #F3F4F6; }
         .check-icon { color: var(--success); flex-shrink: 0; width: 20px; }
 
-        /* EXIT INTENT MODAL */
+        /* MODAL */
         .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
         .modal-content { background-color: #fefefe; margin: 15% auto; padding: 40px; border-radius: 20px; max-width: 500px; text-align: center; position: relative; animation: slideDown 0.4s; }
         @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -133,8 +132,8 @@
 
 <div class="main-wrapper">
     <div class="hero">
-        <!-- LOGO -->
-        <img src="/images/logo.png" alt="KeySense AI Logo" class="logo-img">
+        <!-- LOGO (Preprost dostop) -->
+        <img src="/logo.png" alt="KeySense AI Logo" class="logo-img">
         <p>Enter any domain. Our AI reveals their most profitable keywords and content gaps.</p>
     </div>
 
@@ -206,7 +205,6 @@
             <div class="card" style="padding: 0;">
                 <div class="card-header"><div class="card-title">Content Strategy Plan</div></div>
                 <div id="articlesList"></div>
-                <!-- Fake Locked Article -->
                 <div class="article-card art-fake">
                     <span class="art-tag">Premium Guide</span>
                     <div class="art-title">How to dominate this niche in 30 days</div>
@@ -239,9 +237,7 @@
                 <div class="card-header"><div class="card-title" style="color:#DC2626;">⚠️ Critical Content Gaps</div></div>
                 <div style="padding: 20px;">
                     <div id="gapList" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
-                    <!-- FAKE BLURRED GAPS -->
                     <div class="fake-gap-area" id="fakeGaps"></div>
-                    
                     <div style="margin-top:20px; text-align:center;">
                         <a href="YOUR_SEMRUSH_AFFILIATE_LINK" style="color:#DC2626; font-weight:700; text-decoration:none; border-bottom:1px dotted #DC2626;" target="_blank">See all missing topics &rarr;</a>
                     </div>
@@ -282,7 +278,6 @@
         window.requestAnimationFrame(step);
     }
 
-    // EXIT INTENT LOGIC
     let modalShown = false;
     document.addEventListener('mouseleave', e => {
         if (e.clientY < 0 && !modalShown && document.getElementById('report').style.display === 'grid') {
@@ -300,7 +295,6 @@
         document.getElementById('trustBadges').style.display = 'none';
         document.getElementById('loader').style.display = 'block';
 
-        // Fake rows generation
         const fakeRows = document.getElementById('fakeRows');
         fakeRows.innerHTML = '';
         for(let i=0; i<10; i++) fakeRows.innerHTML += `<div class="fake-row"><div class="fake-text" style="width:${Math.random()*40+20}%"></div><div class="fake-text" style="width:10%"></div><div class="fake-text" style="width:10%"></div></div>`;
@@ -315,7 +309,6 @@
 
             document.getElementById('summaryText').innerText = data.competitor_summary;
             
-            // ANIMATED STATS & MONEY
             const targetCount = data.hidden_keywords_count || 1250;
             const moneyVal = Math.floor(targetCount * 1.5);
             
