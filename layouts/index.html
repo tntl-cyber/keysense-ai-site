@@ -1,0 +1,280 @@
+{{ define "main" }}
+<style>
+    :root { --primary: #4F46E5; --semrush-orange: #FF642D; --success: #10B981; --danger: #EF4444; }
+    .main-wrapper { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+    .hero { text-align: center; margin-bottom: 40px; }
+    .logo-img { max-width: 450px; width: 100%; height: auto; margin: 0 auto 20px auto; display: block; }
+    .hero p { color: #6B7280; font-size: 1.2rem; max-width: 600px; margin: 0 auto; line-height: 1.5; }
+    
+    /* SEARCH */
+    .search-container { max-width: 700px; margin: 40px auto 30px; position: relative; z-index: 10; }
+    .input-box { display: flex; gap: 10px; background: white; padding: 10px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15); border: 1px solid #E5E7EB; }
+    .input-box input { flex: 1; padding: 16px; border: none; font-size: 1.1rem; outline: none; border-radius: 8px; min-width: 0; }
+    .btn-analyze { background: #111827; color: white; border: none; padding: 16px 40px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 1.1rem; transition: all 0.2s; white-space: nowrap; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+    .btn-analyze:hover { transform: translateY(-2px); }
+
+    .trust-badges { text-align: center; opacity: 0.6; margin-bottom: 60px; font-size: 0.85rem; color: #6B7280; }
+    .trust-logos { display: flex; justify-content: center; gap: 30px; margin-top: 10px; filter: grayscale(100%); flex-wrap: wrap; }
+    
+    .loader { display: none; text-align: center; margin: 80px 0; }
+    .spinner { width: 60px; height: 60px; border: 6px solid #E5E7EB; border-top: 6px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    .report-grid { display: none; grid-template-columns: 2.2fr 1fr; gap: 30px; opacity: 0; transition: opacity 0.6s ease-out; }
+    .col-main, .col-side { display: flex; flex-direction: column; gap: 30px; }
+    
+    .card { background: #FFFFFF; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #E5E7EB; overflow: hidden; position: relative; }
+    .card-header { padding: 20px 25px; border-bottom: 1px solid #F3F4F6; display: flex; align-items: center; justify-content: space-between; background: #fff; }
+    .card-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+    
+    .money-metric { color: var(--success); background: #ECFDF5; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+    .kw-table { width: 100%; border-collapse: collapse; }
+    .kw-table th { text-align: left; padding: 12px 25px; color: #6B7280; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; border-bottom: 1px solid #F3F4F6; }
+    .kw-table td { padding: 16px 25px; border-bottom: 1px solid #F9FAFB; font-size: 0.95rem; font-weight: 600; vertical-align: middle; }
+    .kw-intent { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; background: #EEF2FF; color: var(--primary); }
+    
+    .fake-row { display: flex; padding: 16px 25px; border-bottom: 1px solid #F9FAFB; align-items: center; justify-content: space-between; filter: blur(5px); opacity: 0.6; user-select: none; }
+    .fake-text { height: 14px; background: #E5E7EB; border-radius: 4px; width: 40%; }
+    
+    .lock-overlay { position: absolute; bottom: 0; left: 0; right: 0; height: 250px; background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 30%); display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 40px; z-index: 20; }
+    
+    .btn-upgrade { background: var(--semrush-orange); color: white; text-decoration: none; padding: 18px 45px; border-radius: 50px; font-weight: 800; font-size: 1.1rem; box-shadow: 0 10px 30px rgba(255, 100, 45, 0.4); display: flex; align-items: center; gap: 10px; animation: pulse 2s infinite; transition: transform 0.2s; }
+    .btn-upgrade:hover { transform: scale(1.05); }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 100, 45, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(255, 100, 45, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 100, 45, 0); } }
+
+    .stat-box { background: #1F2937; color: white; padding: 30px; border-radius: 16px; text-align: center; margin-bottom: 30px; }
+    .stat-val { font-size: 3.5rem; font-weight: 800; line-height: 1; color: #34D399; margin: 10px 0; }
+    
+    .value-card { background: #EEF2FF; border: 1px solid #C7D2FE; color: #312E81; padding: 20px; border-radius: 12px; margin-bottom: 30px; text-align: center; }
+    .value-amount { font-size: 2rem; font-weight: 800; color: var(--primary); display: block; margin: 5px 0; }
+
+    .gap-tag { display: inline-block; background: #FEF2F2; color: var(--danger); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; border: 1px solid #FEE2E2; margin: 0 5px 5px 0; }
+    .fake-gap-area { margin-top: 10px; filter: blur(4px); opacity: 0.5; user-select: none; }
+    .fake-gap { display: inline-block; background: #F3F4F6; height: 30px; width: 80px; border-radius: 6px; margin: 0 5px 5px 0; }
+
+    .article-card { padding: 20px 25px; border-bottom: 1px solid #F3F4F6; transition: background 0.2s; }
+    .article-card:hover { background: #F9FAFB; }
+    .art-tag { font-size: 0.75rem; text-transform: uppercase; color: #6B7280; font-weight: 700; margin-bottom: 5px; display: block; }
+    .art-title { font-weight: 700; color: #111827; margin-bottom: 5px; }
+    .art-desc { font-size: 0.9rem; color: #6B7280; line-height: 1.5; }
+    .art-fake { filter: blur(4px); opacity: 0.4; }
+
+    .rec-item { display: flex; gap: 15px; padding: 20px; border-bottom: 1px solid #F3F4F6; }
+    .check-icon { color: var(--success); flex-shrink: 0; width: 20px; }
+
+    .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px); }
+    .modal-content { background-color: #fefefe; margin: 15% auto; padding: 40px; border-radius: 20px; max-width: 500px; text-align: center; position: relative; animation: slideDown 0.4s; }
+    @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; position: absolute; right: 20px; top: 10px; }
+
+    @media (max-width: 800px) { .report-grid { grid-template-columns: 1fr; } .logo-img { max-width: 300px; } .input-box { flex-direction: column; } }
+</style>
+
+<div class="main-wrapper">
+    <div class="hero">
+        <img src="/images/logo.png" alt="KeySense AI Logo" class="logo-img">
+        <p>Enter any domain. Our AI reveals their most profitable keywords and content gaps.</p>
+    </div>
+
+    <div class="search-container" id="searchArea">
+        <div class="input-box">
+            <input type="text" id="urlInput" placeholder="Enter competitor URL (e.g. nike.com)">
+            <button class="btn-analyze" onclick="startAnalysis()">REVEAL DATA</button>
+        </div>
+    </div>
+
+    <div class="trust-badges" id="trustBadges">
+        <p>TRUSTED BY SEO PROFESSIONALS FROM</p>
+        <div class="trust-logos">
+            <span style="font-weight:700; font-size:1.2rem;">GOOGLE</span>
+            <span style="font-weight:700; font-size:1.2rem;">SHOPIFY</span>
+            <span style="font-weight:700; font-size:1.2rem;">WORDPRESS</span>
+            <span style="font-weight:700; font-size:1.2rem;">HUBSPOT</span>
+        </div>
+    </div>
+
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <h3>Analyzing Strategy...</h3>
+    </div>
+
+    <div class="report-grid" id="report">
+        
+        <div class="col-main">
+            <div class="card">
+                <div class="card-header"><div class="card-title">Strategic Executive Summary</div></div>
+                <div style="padding: 25px; line-height: 1.7; color: #374151;" id="summaryText"></div>
+            </div>
+
+            <div class="card" style="padding: 0;">
+                <div class="card-header">
+                    <div class="card-title">Top Money Keywords</div>
+                    <span class="money-metric">High CPC Potential</span>
+                </div>
+                <table class="kw-table">
+                    <thead><tr><th>Keyword</th><th>Intent</th><th>Potential Vol.</th></tr></thead>
+                    <tbody id="moneyTableBody"></tbody>
+                </table>
+                <div style="position:relative;">
+                    <div id="fakeRows"></div>
+                    <div class="lock-overlay">
+                        <h3 style="font-size:1.5rem; margin: 0 0 10px 0; color:#111827;">+ <span id="lockCount">1,200</span> Hidden Keywords</h3>
+                        <p style="color:#4B5563; margin-bottom:25px; max-width:400px; text-align:center;">Unlock search volume, difficulty, and cost-per-click data.</p>
+                        <a href="YOUR_SEMRUSH_AFFILIATE_LINK" class="btn-upgrade" target="_blank">UNLOCK FULL REVENUE DATA</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="padding: 0;">
+                <div class="card-header"><div class="card-title">Content Strategy Plan</div></div>
+                <div id="articlesList"></div>
+                <div class="article-card art-fake">
+                    <span class="art-tag">Premium Guide</span>
+                    <div class="art-title">How to dominate this niche in 30 days</div>
+                    <div class="art-desc">Comprehensive guide on backlinks...</div>
+                </div>
+                <div style="padding: 20px; background: #F9FAFB; text-align: center;">
+                    <a href="YOUR_SEMRUSH_AFFILIATE_LINK" class="btn-upgrade" style="font-size:0.9rem; padding:12px 24px; width:auto; display:inline-flex;" target="_blank">Access Full Content Plan</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-side">
+            <div class="value-card">
+                <div style="font-size:0.85rem; font-weight:600; letter-spacing:1px; text-transform:uppercase;">Estimated Missed Value</div>
+                <span class="value-amount" id="moneyValue">$0</span>
+            </div>
+
+            <div class="stat-box">
+                <div style="font-size:0.8rem; opacity:0.8; text-transform:uppercase;">Total Opportunity</div>
+                <div class="stat-val" id="hiddenCount">0</div>
+                <div class="stat-sub">Untapped Keywords</div>
+            </div>
+
+            <div class="card" style="padding: 0;">
+                <div class="card-header"><div class="card-title" style="color:#DC2626;">⚠️ Critical Content Gaps</div></div>
+                <div style="padding: 20px;">
+                    <div id="gapList" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                    <div class="fake-gap-area" id="fakeGaps"></div>
+                    <div style="margin-top:20px; text-align:center;">
+                        <a href="YOUR_SEMRUSH_AFFILIATE_LINK" style="color:#DC2626; font-weight:700; text-decoration:none; border-bottom:1px dotted #DC2626;" target="_blank">See all missing topics &rarr;</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><div class="card-title">Quick Wins</div></div>
+                <div id="recList" style="padding: 0 20px 20px;"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="exitModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2 style="color: #111827; margin-bottom: 10px;">Wait! Don't leave empty handed.</h2>
+    <p style="color: #6B7280; margin-bottom: 30px;">You are missing out on <b><span id="modalMoney">high value</span></b> traffic.</p>
+    <a href="YOUR_SEMRUSH_AFFILIATE_LINK" class="btn-upgrade" style="justify-content:center; width:100%; box-sizing:border-box;" target="_blank">Claim 7-Day Free Trial</a>
+  </div>
+</div>
+
+<script>
+    function animateValue(obj, start, end, duration, isMoney=false) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            let val = Math.floor(progress * (end - start) + start);
+            obj.innerHTML = isMoney ? "$" + val.toLocaleString() : val.toLocaleString();
+            if (progress < 1) window.requestAnimationFrame(step);
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    let modalShown = false;
+    document.addEventListener('mouseleave', e => {
+        if (e.clientY < 0 && !modalShown && document.getElementById('report').style.display === 'grid') {
+            document.getElementById('exitModal').style.display = 'block';
+            modalShown = true;
+        }
+    });
+    document.querySelector('.close').onclick = () => document.getElementById('exitModal').style.display = 'none';
+
+    async function startAnalysis() {
+        const url = document.getElementById('urlInput').value;
+        if (!url || url.length < 4) return alert("Enter URL");
+
+        document.getElementById('searchArea').style.display = 'none';
+        document.getElementById('trustBadges').style.display = 'none';
+        document.getElementById('loader').style.display = 'block';
+
+        const fakeRows = document.getElementById('fakeRows');
+        fakeRows.innerHTML = '';
+        for(let i=0; i<10; i++) fakeRows.innerHTML += `<div class="fake-row"><div class="fake-text" style="width:${Math.random()*40+20}%"></div><div class="fake-text" style="width:10%"></div><div class="fake-text" style="width:10%"></div></div>`;
+        
+        const fakeGaps = document.getElementById('fakeGaps');
+        fakeGaps.innerHTML = '';
+        for(let i=0; i<8; i++) fakeGaps.innerHTML += `<div class="fake-gap" style="width:${Math.random()*60+40}px"></div>`;
+
+        try {
+            const res = await fetch(`/api/analyze?url=${encodeURIComponent(url)}`);
+            const data = await res.json();
+
+            document.getElementById('summaryText').innerText = data.competitor_summary;
+            
+            const targetCount = data.hidden_keywords_count || 1250;
+            const moneyVal = Math.floor(targetCount * 1.5);
+            
+            animateValue(document.getElementById('hiddenCount'), 0, targetCount, 2000);
+            animateValue(document.getElementById('moneyValue'), 0, moneyVal, 2500, true);
+            
+            document.getElementById('lockCount').innerText = targetCount.toLocaleString();
+            document.getElementById('modalMoney').innerText = "$" + moneyVal.toLocaleString();
+
+            const tableBody = document.getElementById('moneyTableBody');
+            tableBody.innerHTML = '';
+            if(data.money_list_keywords) {
+                data.money_list_keywords.forEach(kw => {
+                    const vol = Math.floor(Math.random() * (20000 - 500) + 500).toLocaleString();
+                    tableBody.innerHTML += `<tr><td><div style="font-weight:600; color:#374151;">${kw}</div></td><td><span class="kw-intent">Transactional</span></td><td style="font-family:monospace; color:#6B7280;">${vol}</td></tr>`;
+                });
+            }
+
+            const artBox = document.getElementById('articlesList');
+            artBox.innerHTML = '';
+            if(data.article_ideas) {
+                data.article_ideas.forEach(art => {
+                    artBox.innerHTML += `<div class="article-card"><span class="art-tag">Topic Cluster</span><div class="art-title">${art.title}</div><div class="art-desc">${art.outline}</div></div>`;
+                });
+            }
+
+            const gapBox = document.getElementById('gapList');
+            gapBox.innerHTML = '';
+            if(data.content_gap_keywords) {
+                data.content_gap_keywords.forEach(kw => {
+                    gapBox.innerHTML += `<div class="gap-tag">⚠️ ${kw}</div>`;
+                });
+            }
+
+            const recBox = document.getElementById('recList');
+            recBox.innerHTML = '';
+            if(data.recommendations) {
+                data.recommendations.forEach(rec => {
+                    recBox.innerHTML += `<div class="rec-item"><svg class="check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg><div><div style="font-weight:700; font-size:0.95rem;">${rec.title}</div><div style="font-size:0.85rem; color:#6B7280;">${rec.desc}</div></div></div>`;
+                });
+            }
+
+            document.getElementById('loader').style.display = 'none';
+            const report = document.getElementById('report');
+            report.style.display = 'grid';
+            setTimeout(() => report.style.opacity = '1', 100);
+
+        } catch (e) {
+            alert("Analysis timed out. Please try again.");
+            location.reload();
+        }
+    }
+</script>
+{{ end }}
