@@ -1,7 +1,7 @@
-baseURL = 'https://keysense-ai-site.pages.dev/'
+baseURL = 'https://keysense-ai.io/'
 languageCode = 'en-us'
 title = 'KeySense AI'
-theme = 'ananke'  # Ali ime tvoje teme, če uporabljaš drugo
+theme = 'ananke'
 
 [markup]
   [markup.goldmark]
