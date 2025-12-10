@@ -1,62 +1,91 @@
 {{ define "main" }}
+<!-- GOOGLE SCHEMA FOR BLOG POSTS (To je ključno za SEO!) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{ .Title }}",
+  "image": "https://keysense-ai.io/images/og-image.png",
+  "author": {
+    "@type": "Organization",
+    "name": "KeySense AI"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "KeySense AI",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://keysense-ai.io/logo.png"
+    }
+  },
+  "datePublished": "{{ .Date.Format "2006-01-02" }}",
+  "description": "{{ .Description }}"
+}
+</script>
+
 <style>
-    /* BLOG STYLES */
     .blog-nav { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 15px 0; position: sticky; top: 0; z-index: 50; }
     .nav-container { max-width: 1100px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
     .nav-logo { height: 30px; }
-    .nav-btn { background: #111827; color: white; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 0.9rem; }
+    .nav-btn { background: #111827; color: white; padding: 8px 20px; border-radius: 50px; font-weight: 700; font-size: 0.9rem; text-decoration:none; transition: transform 0.2s; }
+    .nav-btn:hover { transform: scale(1.05); }
     
-    .blog-wrapper { max-width: 1100px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 40px; }
+    .blog-wrapper { max-width: 1100px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 60px; }
     
-    .article-content h1 { font-size: 2.5rem; margin-bottom: 10px; line-height: 1.2; }
-    .article-meta { color: #6B7280; font-size: 0.9rem; margin-bottom: 30px; }
-    .article-body { font-size: 1.1rem; line-height: 1.7; color: #374151; }
-    .article-body h2 { margin-top: 40px; font-size: 1.8rem; color: #111827; }
-    .article-body p { margin-bottom: 20px; }
-    .article-body img { max-width: 100%; border-radius: 12px; margin: 20px 0; }
+    /* CONTENT STYLING (Psychology of Reading) */
+    .article-content h1 { font-size: 2.8rem; margin-bottom: 15px; line-height: 1.1; color: #111827; letter-spacing: -1px; }
+    .article-meta { color: #6B7280; font-size: 0.95rem; margin-bottom: 40px; border-bottom: 1px solid #e5e7eb; padding-bottom: 20px; }
     
-    /* SIDEBAR (The Money Maker) */
-    .sidebar-widget { background: white; border: 1px solid #e5e7eb; border-radius: 12px; padding: 25px; position: sticky; top: 90px; text-align: center; }
-    .widget-title { font-weight: 700; font-size: 1.2rem; margin-bottom: 10px; }
-    .widget-btn { display: block; background: #FF642D; color: white; padding: 14px; border-radius: 8px; font-weight: 700; margin-top: 15px; box-shadow: 0 4px 15px rgba(255, 100, 45, 0.3); transition: transform 0.2s; }
-    .widget-btn:hover { transform: translateY(-2px); }
+    .article-body { font-size: 1.15rem; line-height: 1.8; color: #374151; font-family: 'Georgia', serif; /* Serif je boljši za branje dolgih tekstov */ }
+    .article-body h2 { margin-top: 50px; font-size: 1.8rem; color: #111827; font-family: 'Inter', sans-serif; font-weight: 800; }
+    .article-body h3 { margin-top: 30px; font-size: 1.4rem; color: #111827; font-family: 'Inter', sans-serif; font-weight: 700; }
+    .article-body p { margin-bottom: 25px; }
+    .article-body ul { margin-bottom: 25px; padding-left: 20px; }
+    .article-body li { margin-bottom: 10px; }
+    .article-body img { max-width: 100%; border-radius: 12px; margin: 30px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .article-body blockquote { border-left: 4px solid #4F46E5; padding-left: 20px; margin: 30px 0; color: #4F46E5; font-style: italic; font-weight: 600; background: #EEF2FF; padding: 20px; border-radius: 0 12px 12px 0; }
+    .article-body a { color: #4F46E5; text-decoration: underline; font-weight: 600; }
 
-    @media(max-width: 800px) { .blog-wrapper { grid-template-columns: 1fr; } }
+    /* SIDEBAR (Sticky Money Maker) */
+    .sidebar-wrapper { position: relative; }
+    .sidebar-widget { background: white; border: 1px solid #e5e7eb; border-radius: 16px; padding: 30px; position: sticky; top: 100px; text-align: center; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1); }
+    .widget-title { font-weight: 800; font-size: 1.4rem; margin-bottom: 10px; line-height: 1.2; }
+    .widget-btn { display: block; background: #FF642D; color: white; padding: 16px; border-radius: 50px; font-weight: 700; margin-top: 20px; box-shadow: 0 10px 25px rgba(255, 100, 45, 0.4); text-decoration:none; transition: transform 0.2s; animation: pulse 2s infinite; }
+    .widget-btn:hover { transform: translateY(-3px); }
+
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 100, 45, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255, 100, 45, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 100, 45, 0); } }
+    @media(max-width: 900px) { .blog-wrapper { grid-template-columns: 1fr; } .sidebar-widget { position: static; margin-top: 40px; } }
 </style>
 
-<!-- NAVIGATION -->
 <nav class="blog-nav">
     <div class="nav-container">
         <a href="/"><img src="/logo.png" alt="KeySense AI" class="nav-logo"></a>
-        <a href="/" class="nav-btn">Launch Tool ⚡</a>
+        <a href="/" class="nav-btn">Run Free Audit ⚡</a>
     </div>
 </nav>
 
 <div class="blog-wrapper">
-    <!-- ARTICLE -->
     <article class="article-content">
         <h1>{{ .Title }}</h1>
-        <div class="article-meta">Published on {{ .Date.Format "Jan 2, 2006" }}</div>
-        
-        <!-- Tu pride vsebina članka -->
+        <div class="article-meta">Updated on {{ .Date.Format "January 2, 2006" }} • By KeySense AI Team</div>
         <div class="article-body">
             {{ .Content }}
         </div>
     </article>
 
-    <!-- SIDEBAR (Prodaja) -->
-    <aside>
+    <aside class="sidebar-wrapper">
         <div class="sidebar-widget">
-            <div class="widget-title">Analyze Your Competitors</div>
-            <p style="font-size: 0.9rem; color: #6b7280;">Use our free AI tool to find hidden money keywords in seconds.</p>
-            <a href="/" class="widget-btn">Run Free Audit</a>
+            <div style="font-size:3rem; margin-bottom:10px;">🕵️‍♂️</div>
+            <div class="widget-title">Steal Your Competitor's Traffic</div>
+            <p style="font-size:1rem; color:#6b7280; line-height:1.5;">Don't guess. Use our free AI tool to find their hidden money keywords in seconds.</p>
+            <a href="/" class="widget-btn">Start Free Analysis</a>
+            <p style="font-size:0.8rem; color:#9CA3AF; margin-top:15px;">No login required.</p>
         </div>
-
-        <div class="sidebar-widget" style="margin-top: 20px; background: #EEF2FF; border-color: #C7D2FE;">
-            <div class="widget-title" style="color: #312E81;">Need More Data?</div>
-            <p style="font-size: 0.9rem; color: #4338CA;">Unlock 20M+ keywords with the industry standard.</p>
-            <!-- TVOJ AFFILIATE LINK -->
-            <a href="YOUR_SEMRUSH_AFFILIATE_LINK" class="widget-btn" style="background: #4F46E5; box-shadow: none;">Try Semrush Free</a>
+        
+        <div class="sidebar-widget" style="margin-top:30px; background:#EEF2FF; border-color:#C7D2FE;">
+            <div class="widget-title" style="color:#312E81;">Need Deep Data?</div>
+            <p style="font-size:0.95rem; color:#4338CA;">Unlock 20M+ keywords, backlinks, and authority scores.</p>
+            <a href="YOUR_SEMRUSH_AFFILIATE_LINK" class="widget-btn" style="background:#4F46E5; box-shadow:none; animation:none;">Try Semrush Free</a>
         </div>
     </aside>
 </div>
