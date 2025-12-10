@@ -2,32 +2,28 @@
 <style>
     :root { --primary: #4F46E5; --semrush-orange: #FF642D; --success: #10B981; --danger: #EF4444; }
     
-    /* SPREMEMBA 1: Zmanjšan padding zgoraj (iz 40px na 10px) */
     .main-wrapper { max-width: 1100px; margin: 0 auto; padding: 10px 20px 40px 20px; position: relative; }
     
-    /* SPREMEMBA 2: Bolj viden Blog gumb */
     .top-nav { position: absolute; top: 10px; right: 20px; z-index: 50; }
     .nav-link { 
         color: #111827; 
         text-decoration: none; 
-        font-weight: 800; /* Bolj debelo */
-        font-size: 1rem; /* Večje */
+        font-weight: 800;
+        font-size: 1rem;
         background: #ffffff;
         padding: 8px 16px;
         border-radius: 50px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Senca za izstopanje */
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         transition: transform 0.2s;
         border: 1px solid #E5E7EB;
     }
     .nav-link:hover { transform: translateY(-2px); color: var(--primary); }
 
-    /* SPREMEMBA 3: Zmanjšan margin okoli hero sekcije */
     .hero { text-align: center; margin-bottom: 20px; margin-top: 20px; }
     
     .logo-img { max-width: 400px; width: 100%; height: auto; margin: 0 auto 10px auto; display: block; }
     .hero p { color: #6B7280; font-size: 1.15rem; max-width: 600px; margin: 0 auto; line-height: 1.4; }
     
-    /* SEARCH: Zmanjšan margin zgoraj (iz 40px na 10px) */
     .search-container { max-width: 700px; margin: 15px auto 40px; position: relative; z-index: 10; }
     
     .input-box { display: flex; gap: 10px; background: white; padding: 10px; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15); border: 1px solid #E5E7EB; }
@@ -93,13 +89,12 @@
 </style>
 
 <div class="main-wrapper">
-    <!-- BLOG LINK (Bolj viden) -->
+    <!-- BLOG LINK -->
     <div class="top-nav">
         <a href="/blog/" class="nav-link">READ BLOG &rarr;</a>
     </div>
 
     <div class="hero">
-        <!-- LOGO -->
         <img src="/logo.png" alt="KeySense AI Logo" class="logo-img">
         <p>Enter any domain. Our AI reveals their most profitable keywords and content gaps.</p>
     </div>
@@ -128,7 +123,7 @@
     </div>
 
     <div class="report-grid" id="report">
-        <!-- VSEBINA POROČILA OSTAJA ENAKA (SKRITA DO KLIKA) -->
+        
         <div class="col-main">
             <div class="card">
                 <div class="card-header"><div class="card-title">Strategic Executive Summary</div></div>
@@ -147,9 +142,11 @@
                 <div style="position:relative;">
                     <div id="fakeRows"></div>
                     <div class="lock-overlay">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#111827" stroke-width="2" style="margin-bottom:15px; opacity:0.8;"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                         <h3 style="font-size:1.5rem; margin: 0 0 10px 0; color:#111827;">+ <span id="lockCount">1,200</span> Hidden Keywords</h3>
                         <p style="color:#4B5563; margin-bottom:25px; max-width:400px; text-align:center;">Unlock search volume, difficulty, and cost-per-click data.</p>
-                        <a href="YOUR_SEMRUSH_AFFILIATE_LINK" class="btn-upgrade" target="_blank">UNLOCK FULL REVENUE DATA</a>
+                        <!-- SAFE LINK -->
+                        <a href="https://www.semrush.com/" class="btn-upgrade" target="_blank">UNLOCK FULL REVENUE DATA</a>
                     </div>
                 </div>
             </div>
@@ -163,7 +160,8 @@
                     <div class="art-desc">Comprehensive guide on backlinks...</div>
                 </div>
                 <div style="padding: 20px; background: #F9FAFB; text-align: center;">
-                    <a href="YOUR_SEMRUSH_AFFILIATE_LINK" class="btn-upgrade" style="font-size:0.9rem; padding:12px 24px; width:auto; display:inline-flex;" target="_blank">Access Full Content Plan</a>
+                    <!-- SAFE LINK -->
+                    <a href="https://www.semrush.com/" class="btn-upgrade" style="font-size:0.9rem; padding:12px 24px; width:auto; display:inline-flex;" target="_blank">Access Full Content Plan</a>
                 </div>
             </div>
         </div>
@@ -186,7 +184,8 @@
                     <div id="gapList" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
                     <div class="fake-gap-area" id="fakeGaps"></div>
                     <div style="margin-top:20px; text-align:center;">
-                        <a href="YOUR_SEMRUSH_AFFILIATE_LINK" style="color:#DC2626; font-weight:700; text-decoration:none; border-bottom:1px dotted #DC2626;" target="_blank">See all missing topics &rarr;</a>
+                        <!-- SAFE LINK -->
+                        <a href="https://www.semrush.com/" style="color:#DC2626; font-weight:700; text-decoration:none; border-bottom:1px dotted #DC2626;" target="_blank">See all missing topics &rarr;</a>
                     </div>
                 </div>
             </div>
@@ -196,6 +195,7 @@
                 <div id="recList" style="padding: 0 20px 20px;"></div>
             </div>
         </div>
+
     </div>
 </div>
 
@@ -203,8 +203,9 @@
   <div class="modal-content">
     <span class="close">&times;</span>
     <h2 style="color: #111827; margin-bottom: 10px;">Wait! Don't leave empty handed.</h2>
-    <p style="color: #6B7280; margin-bottom: 30px;">You are missing out on <b><span id="modalMoney">high value</span></b> traffic.</p>
-    <a href="YOUR_SEMRUSH_AFFILIATE_LINK" class="btn-upgrade" style="justify-content:center; width:100%; box-sizing:border-box;" target="_blank">Claim 7-Day Free Trial</a>
+    <p style="color: #6B7280; margin-bottom: 30px;">Your competitor analysis is incomplete. You are missing out on <b><span id="modalMoney">high value</span></b> traffic.</p>
+    <!-- SAFE LINK -->
+    <a href="https://www.semrush.com/" class="btn-upgrade" style="justify-content:center; width:100%; box-sizing:border-box;" target="_blank">Claim 7-Day Free Trial</a>
   </div>
 </div>
 
