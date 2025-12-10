@@ -1,52 +1,56 @@
 {{ define "main" }}
-<!-- GOOGLE SCHEMA FOR BLOG POSTS (To je ključno za SEO!) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   "headline": "{{ .Title }}",
   "image": "https://keysense-ai.io/images/og-image.png",
-  "author": {
-    "@type": "Organization",
-    "name": "KeySense AI"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "KeySense AI",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://keysense-ai.io/logo.png"
-    }
-  },
+  "author": { "@type": "Organization", "name": "KeySense AI" },
+  "publisher": { "@type": "Organization", "name": "KeySense AI", "logo": { "@type": "ImageObject", "url": "https://keysense-ai.io/logo.png" } },
   "datePublished": "{{ .Date.Format "2006-01-02" }}",
   "description": "{{ .Description }}"
 }
 </script>
 
 <style>
+    /* OSNOVNE NASTAVITVE */
     .blog-nav { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 15px 0; position: sticky; top: 0; z-index: 50; }
     .nav-container { max-width: 1100px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
-    .nav-logo { height: 30px; }
-    .nav-btn { background: #111827; color: white; padding: 8px 20px; border-radius: 50px; font-weight: 700; font-size: 0.9rem; text-decoration:none; transition: transform 0.2s; }
+    .nav-logo { height: 35px; width: auto; } /* Popravljen logo */
+    .nav-btn { background: #111827; color: white; padding: 10px 20px; border-radius: 50px; font-weight: 700; font-size: 0.9rem; text-decoration:none; transition: transform 0.2s; }
     .nav-btn:hover { transform: scale(1.05); }
     
     .blog-wrapper { max-width: 1100px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 2fr 1fr; gap: 60px; }
     
-    /* CONTENT STYLING (Psychology of Reading) */
-    .article-content h1 { font-size: 2.8rem; margin-bottom: 15px; line-height: 1.1; color: #111827; letter-spacing: -1px; }
+    /* VSEBINA ČLANKA (TIPOGRAFIJA) */
+    .article-content h1 { font-size: 2.5rem; margin-bottom: 15px; line-height: 1.2; color: #111827; font-weight: 800; letter-spacing: -0.5px; }
     .article-meta { color: #6B7280; font-size: 0.95rem; margin-bottom: 40px; border-bottom: 1px solid #e5e7eb; padding-bottom: 20px; }
     
-    .article-body { font-size: 1.15rem; line-height: 1.8; color: #374151; font-family: 'Georgia', serif; /* Serif je boljši za branje dolgih tekstov */ }
-    .article-body h2 { margin-top: 50px; font-size: 1.8rem; color: #111827; font-family: 'Inter', sans-serif; font-weight: 800; }
-    .article-body h3 { margin-top: 30px; font-size: 1.4rem; color: #111827; font-family: 'Inter', sans-serif; font-weight: 700; }
-    .article-body p { margin-bottom: 25px; }
-    .article-body ul { margin-bottom: 25px; padding-left: 20px; }
+    /* Oblikovanje samega besedila */
+    .article-body { font-size: 1.125rem; line-height: 1.8; color: #374151; font-family: 'Georgia', serif; }
+    
+    /* NASLOVI v tekstu */
+    .article-body h2 { margin-top: 50px; margin-bottom: 20px; font-size: 1.8rem; color: #111827; font-family: 'Inter', sans-serif; font-weight: 800; border-bottom: 2px solid #F3F4F6; padding-bottom: 10px; }
+    .article-body h3 { margin-top: 30px; margin-bottom: 15px; font-size: 1.4rem; color: #111827; font-family: 'Inter', sans-serif; font-weight: 700; }
+    
+    /* ODSTAVKI in SEZNAMI */
+    .article-body p { margin-bottom: 20px; }
+    .article-body ul, .article-body ol { margin-bottom: 25px; padding-left: 25px; }
     .article-body li { margin-bottom: 10px; }
-    .article-body img { max-width: 100%; border-radius: 12px; margin: 30px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-    .article-body blockquote { border-left: 4px solid #4F46E5; padding-left: 20px; margin: 30px 0; color: #4F46E5; font-style: italic; font-weight: 600; background: #EEF2FF; padding: 20px; border-radius: 0 12px 12px 0; }
+    .article-body strong { color: #111827; font-weight: 700; }
+    
+    /* TABLE STYLING (Popravek za tabelo) */
+    .article-body table { width: 100%; border-collapse: collapse; margin: 30px 0; font-family: 'Inter', sans-serif; font-size: 0.95rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border-radius: 8px; overflow: hidden; }
+    .article-body th { background-color: #F3F4F6; color: #111827; font-weight: 700; text-align: left; padding: 15px; border-bottom: 2px solid #E5E7EB; }
+    .article-body td { padding: 15px; border-bottom: 1px solid #E5E7EB; color: #4B5563; }
+    .article-body tr:last-child td { border-bottom: none; }
+    
+    /* POVEZAVE in SLIKE */
     .article-body a { color: #4F46E5; text-decoration: underline; font-weight: 600; }
+    .article-body img { max-width: 100%; border-radius: 12px; margin: 30px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid #F3F4F6; }
+    .article-body blockquote { border-left: 4px solid #4F46E5; background: #EEF2FF; padding: 20px; margin: 30px 0; font-style: italic; color: #3730A3; border-radius: 0 8px 8px 0; }
 
-    /* SIDEBAR (Sticky Money Maker) */
+    /* SIDEBAR */
     .sidebar-wrapper { position: relative; }
     .sidebar-widget { background: white; border: 1px solid #e5e7eb; border-radius: 16px; padding: 30px; position: sticky; top: 100px; text-align: center; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1); }
     .widget-title { font-weight: 800; font-size: 1.4rem; margin-bottom: 10px; line-height: 1.2; }
@@ -59,6 +63,7 @@
 
 <nav class="blog-nav">
     <div class="nav-container">
+        <!-- Logo popravek -->
         <a href="/"><img src="/logo.png" alt="KeySense AI" class="nav-logo"></a>
         <a href="/" class="nav-btn">Run Free Audit ⚡</a>
     </div>
@@ -67,7 +72,7 @@
 <div class="blog-wrapper">
     <article class="article-content">
         <h1>{{ .Title }}</h1>
-        <div class="article-meta">Updated on {{ .Date.Format "January 2, 2006" }} • By KeySense AI Team</div>
+        <div class="article-meta">Published on {{ .Date.Format "January 2, 2006" }} • By KeySense AI Team</div>
         <div class="article-body">
             {{ .Content }}
         </div>
@@ -85,6 +90,7 @@
         <div class="sidebar-widget" style="margin-top:30px; background:#EEF2FF; border-color:#C7D2FE;">
             <div class="widget-title" style="color:#312E81;">Need Deep Data?</div>
             <p style="font-size:0.95rem; color:#4338CA;">Unlock 20M+ keywords, backlinks, and authority scores.</p>
+            <!-- AFFILIATE LINK -->
             <a href="YOUR_SEMRUSH_AFFILIATE_LINK" class="widget-btn" style="background:#4F46E5; box-shadow:none; animation:none;">Try Semrush Free</a>
         </div>
     </aside>
