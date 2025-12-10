@@ -1,8 +1,15 @@
 {{ define "main" }}
 <style>
     :root { --primary: #4F46E5; --semrush-orange: #FF642D; --success: #10B981; --danger: #EF4444; }
-    .main-wrapper { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
-    .hero { text-align: center; margin-bottom: 40px; }
+    .main-wrapper { max-width: 1100px; margin: 0 auto; padding: 40px 20px; position: relative; }
+    
+    /* NAVIGACIJA (Blog Link) */
+    .top-nav { position: absolute; top: 20px; right: 20px; z-index: 50; }
+    .nav-link { color: #6B7280; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: color 0.2s; }
+    .nav-link:hover { color: #111827; }
+
+    .hero { text-align: center; margin-bottom: 40px; margin-top: 40px; }
+    /* POPRAVLJENA POT DO SLIKE */
     .logo-img { max-width: 450px; width: 100%; height: auto; margin: 0 auto 20px auto; display: block; }
     .hero p { color: #6B7280; font-size: 1.2rem; max-width: 600px; margin: 0 auto; line-height: 1.5; }
     
@@ -67,12 +74,18 @@
     @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; position: absolute; right: 20px; top: 10px; }
 
-    @media (max-width: 800px) { .report-grid { grid-template-columns: 1fr; } .logo-img { max-width: 300px; } .input-box { flex-direction: column; } }
+    @media (max-width: 800px) { .report-grid { grid-template-columns: 1fr; } .logo-img { max-width: 300px; } .input-box { flex-direction: column; } .top-nav { top: 10px; right: 10px; } }
 </style>
 
 <div class="main-wrapper">
+    <!-- BLOG LINK (Novost) -->
+    <div class="top-nav">
+        <a href="/blog/how-to-steal-traffic/" class="nav-link">Read Blog &rarr;</a>
+    </div>
+
     <div class="hero">
-        <img src="/images/logo.png" alt="KeySense AI Logo" class="logo-img">
+        <!-- LOGO (Popravljena pot) -->
+        <img src="/logo.png" alt="KeySense AI Logo" class="logo-img">
         <p>Enter any domain. Our AI reveals their most profitable keywords and content gaps.</p>
     </div>
 
@@ -95,7 +108,8 @@
 
     <div class="loader" id="loader">
         <div class="spinner"></div>
-        <h3>Analyzing Strategy...</h3>
+        <h3>Analiziram Profitabilnost...</h3>
+        <p style="color: #6B7280;">Izračunavam vrednost prometa in vrzeli.</p>
     </div>
 
     <div class="report-grid" id="report">
