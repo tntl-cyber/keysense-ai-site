@@ -22,7 +22,7 @@ The answer usually lies in their keyword strategy. They rank for terms you don't
 
 
 
-First, you need to know who you are fighting. Go to our \[Home Page](/) and enter your competitor's URL.
+First, you need to know who you are fighting. Go to our \[www.keysense-ai.io](/) and enter your competitor's URL.
 
 
 
@@ -46,7 +46,7 @@ Once the scan is complete, look for the blue section. These are transactional ke
 
 
 
-> \*\*Pro Tip:\*\* If you want to see the exact search volume and difficulty, you will need a professional tool. We recommend \[Semrush](YOUR\_SEMRUSH\_AFFILIATE\_LINK) for deep data.
+> \*\*Pro Tip:\*\* If you want to see the exact search volume and difficulty, you will need a professional tool. We recommend \[Semrush]www.semrush.com) for deep data.
 
 
 
